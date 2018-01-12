@@ -82,15 +82,6 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-zipkin')
     compile('org.springframework.boot:spring-boot-starter-amqp')
 
-    // gui page
-    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
-    compile("org.springframework.boot:spring-boot-starter-security")
-    compile('org.webjars:jquery:3.2.1')
-    compile('org.webjars:bootstrap:3.3.7-1')
-
-    // other
-    compile('commons-validator:commons-validator:1.6')
-
     // tests only
     testCompile('junit:junit:4.+')
     testCompile('org.springframework.boot:spring-boot-starter-test')

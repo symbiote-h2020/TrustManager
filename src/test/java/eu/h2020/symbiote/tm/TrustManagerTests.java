@@ -1,4 +1,4 @@
-package eu.h2020.symbiote.fm;
+package eu.h2020.symbiote.tm;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 @TestPropertySource(locations = "classpath:test.properties")
-public class FederationManagerApplicationTests {
+public class TrustManagerTests {
 
 	@Test
 	public void contextLoads() {
