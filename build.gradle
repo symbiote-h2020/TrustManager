@@ -62,30 +62,23 @@ configurations.all {
 }
 
 dependencies {
-    /* SymbIoTeLibraries manual:
-        One can use the library from jitpack by default with the notation:
-            compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') {changing = true }
-        or having cloned locally the SymbIoTeLibraries repo use it directly with project dependency by:
-            compile project(':SymbIoTeLibraries')
-        Important --- In order to use the latter you need to:
-            1) switch comments on the artifact and project dependencies
-            2) always have only one uncommented
-            3) project dependency requires changes in settings.gradle file in this project
-            4) never commit build.gradle which has project dependencies active as it will break CI builds
-    */
-
-    compile('com.github.symbiote-h2020:SymbIoTeLibraries:4.+') { changing = true }
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') { changing = true }
+	compile('com.github.symbiote-h2020:SymbIoTeSecurity:23.+'){ changing = true }
 
     // Spring
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-zipkin')
+    compile('org.springframework.cloud:spring-cloud-starter-feign')
     compile('org.springframework.boot:spring-boot-starter-amqp')
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
-    // tests only
-    testCompile('junit:junit:4.+')
+    // test only
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('org.springframework.security:spring-security-test')
+    testCompile('com.github.tomakehurst:wiremock')
+    testCompile('org.springframework:spring-core')
 }
 
 // code quality below
