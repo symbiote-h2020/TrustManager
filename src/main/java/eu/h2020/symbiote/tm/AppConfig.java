@@ -21,6 +21,11 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 
+/**
+ * @author RuggenthalerC
+ * 
+ *         Component config beans.
+ */
 @Configuration
 @EnableMongoRepositories
 class AppConfig extends AbstractMongoConfiguration {
