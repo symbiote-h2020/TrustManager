@@ -31,8 +31,15 @@ public class TrustEntry {
 		this.dateUpdated = new Date();
 	}
 
+	public TrustEntry(Type type, String platformId, Double value) {
+		this.type = type;
+		this.platformId = platformId;
+		this.value = value;
+		this.dateUpdated = new Date();
+	}
+
 	public enum Type {
-		PLATFORM, RESOURCE
+		PLATFORM_REPUTATION, RESOURCE_TRUST, ADAPTIVE_RESOURCE_TRUST
 	}
 
 	@JsonProperty("type")
