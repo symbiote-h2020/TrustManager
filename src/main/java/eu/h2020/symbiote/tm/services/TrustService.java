@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.tm.services;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -36,10 +37,10 @@ public class TrustService {
 	 * @return
 	 */
 	public Double getPlatformReputation(String platformId) {
-		Double score = getFederationHistoryScore(platformId);
-		logger.debug("Calculated Platform reputation for platform {} with score {}", platformId, score);
+		Double fhScore = getFederationHistoryScore(platformId);
 
-		// persist score
+		Double score = roundTo2Digits(fhScore);
+		logger.debug("Calculated Platform reputation for platform {} with score {}", platformId, score);
 		repository.save(new TrustEntry(Type.PLATFORM_REPUTATION, platformId, score));
 		return score;
 	}
@@ -48,11 +49,14 @@ public class TrustService {
 		List<FederationHistory> fh = amqpService.fetchFederationHistory(platformId);
 		Double score = 0.0;
 
-		for (FederationHistory h : fh) {
-			score += calcHistoryEntry(h);
+		if (fh != null && !fh.isEmpty()) {
+			for (FederationHistory h : fh) {
+				score += calcHistoryEntry(h);
+			}
+			score = score / fh.size();
 		}
 
-		return score / fh.size();
+		return score * 100;
 	}
 
 	/**
@@ -72,4 +76,8 @@ public class TrustService {
 
 	}
 
+	private Double roundTo2Digits(Double val) {
+		DecimalFormat rounded = new DecimalFormat("#.##");
+		return Double.valueOf(rounded.format(val));
+	}
 }
