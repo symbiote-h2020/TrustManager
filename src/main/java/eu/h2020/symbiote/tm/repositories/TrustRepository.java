@@ -12,6 +12,6 @@ import eu.h2020.symbiote.tm.model.TrustEntry;
  */
 public interface TrustRepository extends MongoRepository<TrustEntry, String> {
 
-	@Query("{'platform_id' : ?0, type : ?1")
+	@Query("{'platform_id' : ?0, 'type' : ?1}")
 	public TrustEntry findEntryByPlatformIdAndType(String platformId, TrustEntry.Type type);
 }
