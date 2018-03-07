@@ -62,7 +62,7 @@ configurations.all {
 }
 
 dependencies {
-    compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') { changing = true }
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:5.+') { changing = true }
 	compile('com.github.symbiote-h2020:SymbIoTeSecurity:23.+'){ changing = true }
 
     // Spring
