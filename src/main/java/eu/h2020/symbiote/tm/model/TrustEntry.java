@@ -28,14 +28,14 @@ public class TrustEntry {
 		this.platformId = platformId;
 		this.resourceId = resourceId;
 		this.value = value;
-		this.dateUpdated = new Date();
+		this.lastUpdate = new Date();
 	}
 
 	public TrustEntry(Type type, String platformId, Double value) {
 		this.type = type;
 		this.platformId = platformId;
 		this.value = value;
-		this.dateUpdated = new Date();
+		this.lastUpdate = new Date();
 	}
 
 	public enum Type {
@@ -45,8 +45,8 @@ public class TrustEntry {
 	@JsonProperty("type")
 	private Type type;
 
-	@JsonProperty("date_updated")
-	private Date dateUpdated;
+	@JsonProperty("last_update")
+	private Date lastUpdate;
 
 	@JsonProperty("platform_id")
 	private String platformId;
@@ -65,12 +65,12 @@ public class TrustEntry {
 		this.type = type;
 	}
 
-	public Date getDateUpdated() {
-		return this.dateUpdated;
+	public Date getLastUpdate() {
+		return this.lastUpdate;
 	}
 
-	public void setDateUpdated(Date dateUpdated) {
-		this.dateUpdated = dateUpdated;
+	public void setLastUpdate(Date lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 
 	public String getPlatformId() {
