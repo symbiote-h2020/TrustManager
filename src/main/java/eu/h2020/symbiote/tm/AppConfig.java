@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Created by mateuszl on 30.09.2016.
@@ -28,6 +29,7 @@ import com.mongodb.MongoClient;
  *         Component config beans.
  */
 @Configuration
+@EnableScheduling
 @EnableMongoRepositories
 class AppConfig extends AbstractMongoConfiguration {
 
