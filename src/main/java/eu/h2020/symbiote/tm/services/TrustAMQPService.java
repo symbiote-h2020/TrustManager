@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.federation.model.FederationHistoryResponse;
-import eu.h2020.symbiote.tm.model.TrustEntry;
+import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 
 /**
  * @author RuggenthalerC

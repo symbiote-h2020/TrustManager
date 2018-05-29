@@ -3,7 +3,7 @@ package eu.h2020.symbiote.tm.repositories;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import eu.h2020.symbiote.tm.model.TrustEntry;
+import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 
 /**
  * @author ruggenthalerc
