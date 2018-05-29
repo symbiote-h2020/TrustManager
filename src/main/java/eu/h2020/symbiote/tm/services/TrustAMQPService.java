@@ -6,12 +6,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.federation.model.FederationHistoryResponse;
+import eu.h2020.symbiote.tm.model.TrustEntry;
 
 /**
  * @author RuggenthalerC
@@ -23,11 +26,61 @@ import eu.h2020.symbiote.cloud.federation.model.FederationHistoryResponse;
 public class TrustAMQPService {
 	private static final Logger logger = LoggerFactory.getLogger(TrustAMQPService.class);
 
+	@Value("${rabbit.routingKey.trust.resource_trust.updated}")
+	private String routingKeyResTrustUpdated;
+
+	@Value("${rabbit.routingKey.trust.platform_reputation.updated}")
+	private String routingKeyPlatfRepUpdated;
+
+	@Value("${rabbit.routingKey.trust.adaptive_resource_trust.updated}")
+	private String routingKeyAdaptiveResTrustUpdated;
+
 	@Autowired
 	private RabbitTemplate template;
 
 	@Autowired
 	private Queue federationHistoryQueue;
+
+	@Autowired
+	private TopicExchange trustTopic;
+
+	/**
+	 * Publish updated Resource Trust entriy to topic.
+	 * 
+	 * @param trustObj
+	 */
+	public void publishResourceTrustUpdated(TrustEntry trustObj) {
+		send(routingKeyResTrustUpdated, trustObj);
+	}
+
+	/**
+	 * Publish updated Resource Trust entriy to topic.
+	 * 
+	 * @param trustObj
+	 */
+	public void publishPlatformReputationUpdated(TrustEntry trustObj) {
+		send(routingKeyPlatfRepUpdated, trustObj);
+	}
+
+	/**
+	 * Publish updated Resource Trust entriy to topic.
+	 * 
+	 * @param trustObj
+	 */
+	public void publishAdaptiveResourceTrustUpdated(TrustEntry trustObj) {
+		send(routingKeyAdaptiveResTrustUpdated, trustObj);
+	}
+
+	/**
+	 * Sends the given message to topic with given routing key.
+	 * 
+	 * @param routingKey
+	 * @param trustObj
+	 */
+	private void send(String routingKey, TrustEntry trustObj) {
+		logger.debug("Message published with routingkey: {} and msg: {}", routingKey, trustObj);
+		template.convertAndSend(trustTopic.getName(), routingKey, trustObj);
+	}
 
 	/**
 	 * Fetch federation history entries for given platform id.

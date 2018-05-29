@@ -10,12 +10,13 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  *
  *         Main entry point to start spring boot application.
  */
-@EnableDiscoveryClient    
+@EnableDiscoveryClient
 @EnableAutoConfiguration
 @SpringBootApplication
 public class TrustManagerApplication {
 
 	public static void main(String[] args) {
+		WaitForPort.waitForServices(WaitForPort.findProperty("SPRING_BOOT_WAIT_FOR_SERVICES"));
 		SpringApplication.run(TrustManagerApplication.class, args);
-    }
+	}
 }

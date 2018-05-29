@@ -2,6 +2,7 @@ package eu.h2020.symbiote.tm;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -50,6 +51,12 @@ class AppConfig extends AbstractMongoConfiguration {
 	@Bean
 	public Queue federationHistoryQueue(@Value("${rabbit.queue.federation.get_federation_history}") String queue) {
 		return new Queue(queue);
+	}
+
+	@Bean
+	public TopicExchange trustTopic(@Value("${rabbit.exchange.trust}") String exchange, @Value("${rabbit.exchange.trust.durable}") Boolean durable,
+			@Value("${rabbit.exchange.trust.autodelete}") Boolean autoDelete) {
+		return new TopicExchange(exchange, durable, autoDelete);
 	}
 
 	@Override
