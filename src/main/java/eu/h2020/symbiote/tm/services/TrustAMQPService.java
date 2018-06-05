@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.federation.model.FederationHistoryResponse;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
+import eu.h2020.symbiote.util.RabbitConstants;
 
 /**
  * @author RuggenthalerC
@@ -26,13 +27,13 @@ import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 public class TrustAMQPService {
 	private static final Logger logger = LoggerFactory.getLogger(TrustAMQPService.class);
 
-	@Value("${rabbit.routingKey.trust.resource_trust.updated}")
+	@Value("${" + RabbitConstants.ROUTING_KEY_TRUST_RESOURCE_UPDATED + "}")
 	private String routingKeyResTrustUpdated;
 
-	@Value("${rabbit.routingKey.trust.platform_reputation.updated}")
+	@Value("${" + RabbitConstants.ROUTING_KEY_TRUST_PLATFORM_UPDATED + "}")
 	private String routingKeyPlatfRepUpdated;
 
-	@Value("${rabbit.routingKey.trust.adaptive_resource_trust.updated}")
+	@Value("${" + RabbitConstants.ROUTING_KEY_TRUST_ADAPTIVE_RESOURCE_UPDATED + "}")
 	private String routingKeyAdaptiveResTrustUpdated;
 
 	@Autowired
@@ -45,7 +46,7 @@ public class TrustAMQPService {
 	private TopicExchange trustTopic;
 
 	/**
-	 * Publish updated Resource Trust entriy to topic.
+	 * Publish updated Resource Trust entry to topic.
 	 * 
 	 * @param trustObj
 	 */
@@ -54,7 +55,7 @@ public class TrustAMQPService {
 	}
 
 	/**
-	 * Publish updated Resource Trust entriy to topic.
+	 * Publish updated Resource Trust entry to topic.
 	 * 
 	 * @param trustObj
 	 */
@@ -63,7 +64,7 @@ public class TrustAMQPService {
 	}
 
 	/**
-	 * Publish updated Resource Trust entriy to topic.
+	 * Publish updated Resource Trust entry to topic.
 	 * 
 	 * @param trustObj
 	 */

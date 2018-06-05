@@ -23,6 +23,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 
+import eu.h2020.symbiote.util.RabbitConstants;
+
 /**
  * @author RuggenthalerC
  * 
@@ -56,8 +58,9 @@ class AppConfig extends AbstractMongoConfiguration {
 	}
 
 	@Bean
-	public TopicExchange trustTopic(@Value("${rabbit.exchange.trust}") String exchange, @Value("${rabbit.exchange.trust.durable}") Boolean durable,
-			@Value("${rabbit.exchange.trust.autodelete}") Boolean autoDelete) {
+	public TopicExchange trustTopic(@Value("${" + RabbitConstants.EXCHANGE_TRUST_NAME_PROPERTY + "}") String exchange,
+			@Value("${" + RabbitConstants.EXCHANGE_TRUST_DURABLE_PROPERTY + "}") Boolean durable,
+			@Value("${" + RabbitConstants.EXCHANGE_TRUST_AUTODELETE_PROPERTY + "}") Boolean autoDelete) {
 		return new TopicExchange(exchange, durable, autoDelete);
 	}
 
