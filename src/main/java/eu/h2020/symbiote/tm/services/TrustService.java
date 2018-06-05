@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
-import eu.h2020.symbiote.cloud.trust.model.TrustEntry.Type;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 /**
@@ -41,7 +40,7 @@ public class TrustService {
 
 		Double score = roundTo2Digits(fhScore);
 		logger.debug("Calculated Platform reputation for platform {} with score {}", platformId, score);
-		repository.save(new TrustEntry(Type.PLATFORM_REPUTATION, platformId, score));
+		repository.save(new TrustEntry(platformId, score));
 		return score;
 	}
 
