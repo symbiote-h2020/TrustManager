@@ -24,7 +24,7 @@ import eu.h2020.symbiote.util.RabbitConstants;
 /**
  * @author RuggenthalerC
  *
- *         AMQP listener endpoints for platform & resource updates from SM, PR & FM.
+ *         AMQP listener endpoints for platform and resource updates from SM, PR and FM.
  */
 @Service
 public class ResourceUpdateListener {
@@ -40,6 +40,7 @@ public class ResourceUpdateListener {
 	 * Receives own resource registration updates from RH.
 	 * 
 	 * @param registeredResList
+	 *            list of registered resources
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
 			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${" + RabbitConstants.ROUTING_KEY_RH_UPDATED_PROPERTY + "}"))
@@ -63,6 +64,7 @@ public class ResourceUpdateListener {
 	 * Receives own resource deletion updates from RH.
 	 * 
 	 * @param deletedResList
+	 *            list of deleted resources
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
 			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${" + RabbitConstants.ROUTING_KEY_RH_DELETED_PROPERTY + "}"))
@@ -80,6 +82,7 @@ public class ResourceUpdateListener {
 	 * Receives foreign resource adding/updating messages from SM and stores the resource trust values.
 	 * 
 	 * @param sharedResources
+	 *            shared resource message
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
 			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.addOrUpdateFederatedResources}"))
@@ -102,6 +105,7 @@ public class ResourceUpdateListener {
 	 * Receives foreign resource deletion messages from SM.
 	 * 
 	 * @param unsharedResources
+	 *            unshared resource message
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_PLATFORM_REGISTRY_TYPE_PROPERTY
 			+ "}", type = "${" + RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.removeFederatedResources}"))
@@ -119,6 +123,7 @@ public class ResourceUpdateListener {
 	 * Receives created federation requests.
 	 * 
 	 * @param fed
+	 *            federation object
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.federation}", type = "${rabbit.exchange.federation.type}"), key = "${rabbit.routingKey.federation.created}"))
 	public void receiveFederationCreated(Federation fed) {
@@ -129,6 +134,7 @@ public class ResourceUpdateListener {
 	 * Receives updated federation requests.
 	 * 
 	 * @param fed
+	 *            federation object
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.federation}", type = "${rabbit.exchange.federation.type}"), key = "${rabbit.routingKey.federation.changed}"))
 	public void receiveFederationUpdated(Federation fed) {

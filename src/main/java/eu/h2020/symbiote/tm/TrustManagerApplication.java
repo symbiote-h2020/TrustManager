@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 /**
  * @author RuggenthalerC
  *
- *         Main entry point to start spring boot application.
+ *         Main entry point to start the trust manager.
  */
 @EnableDiscoveryClient
 @EnableAutoConfiguration

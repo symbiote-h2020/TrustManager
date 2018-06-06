@@ -49,6 +49,7 @@ public class TrustAMQPService {
 	 * Publish updated Resource Trust entry to topic.
 	 * 
 	 * @param trustObj
+	 *            trustentry
 	 */
 	public void publishResourceTrustUpdate(TrustEntry trustObj) {
 		send(routingKeyResTrustUpdated, trustObj);
@@ -58,6 +59,7 @@ public class TrustAMQPService {
 	 * Publish updated Resource Trust entry to topic.
 	 * 
 	 * @param trustObj
+	 *            trustentry
 	 */
 	public void publishPlatformReputationUpdate(TrustEntry trustObj) {
 		send(routingKeyPlatfRepUpdated, trustObj);
@@ -67,17 +69,12 @@ public class TrustAMQPService {
 	 * Publish updated Resource Trust entry to topic.
 	 * 
 	 * @param trustObj
+	 *            trustentry
 	 */
 	public void publishAdaptiveResourceTrustUpdate(TrustEntry trustObj) {
 		send(routingKeyAdaptiveResTrustUpdated, trustObj);
 	}
 
-	/**
-	 * Sends the given message to topic with given routing key.
-	 * 
-	 * @param routingKey
-	 * @param trustObj
-	 */
 	private void send(String routingKey, TrustEntry trustObj) {
 		logger.debug("Message published with routingkey: {} and msg: {}", routingKey, trustObj);
 		template.convertAndSend(trustTopic.getName(), routingKey, trustObj);
@@ -89,7 +86,8 @@ public class TrustAMQPService {
 	 * Returns FederationHistory list or empty list if failed.
 	 * 
 	 * @param platformId
-	 * @return List<FederationHistory>
+	 *            platform id
+	 * @return List of FederationHistory entries
 	 */
 	public List<FederationHistory> fetchFederationHistory(String platformId) {
 		logger.debug("Queried fed history for platform {}", platformId);
@@ -103,6 +101,5 @@ public class TrustAMQPService {
 			logger.warn("No history response returned for platform {} - response: {}", platformId, r);
 			return new ArrayList<>();
 		}
-
 	}
 }

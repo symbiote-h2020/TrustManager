@@ -33,7 +33,8 @@ public class TrustCalculationService {
 	 * Calculates resource trust for given internal resource ID.
 	 * 
 	 * @param resId
-	 * @return
+	 *            internal resource ID
+	 * @return resource trust value double value between 0 - 100
 	 */
 	public Double calcResourceTrust(String resId) {
 		// TODO: Add logic
@@ -44,7 +45,8 @@ public class TrustCalculationService {
 	 * Calculates adaptive resource trust for given symbiote resource ID.
 	 * 
 	 * @param resId
-	 * @return
+	 *            symbIoTe ID
+	 * @return adaptive resource trust value double value between 0 - 100
 	 */
 	public Double calcAdaptiveResourceTrust(String resId) {
 		// TODO: Add logic
@@ -55,7 +57,8 @@ public class TrustCalculationService {
 	 * Calculates platform reputation for given platformId.
 	 * 
 	 * @param platformId
-	 * @return
+	 *            platform ID
+	 * @return platform reputation value double value between 0 - 100
 	 */
 	public Double calcPlatformReputation(String platformId) {
 		Double fhScore = getFederationHistoryScore(platformId);
@@ -80,12 +83,6 @@ public class TrustCalculationService {
 		return score * 100;
 	}
 
-	/**
-	 * Calculates the score for one federation history entry taking account the differnt dates.
-	 * 
-	 * @param h
-	 * @return
-	 */
 	private Double calcHistoryEntry(FederationHistory h) {
 		Long fedPeriod = h.getDateFederationRemoved() != null ? h.getDateFederationRemoved().getTime() : new Date().getTime();
 		fedPeriod = fedPeriod - h.getDateFederationCreated().getTime();
