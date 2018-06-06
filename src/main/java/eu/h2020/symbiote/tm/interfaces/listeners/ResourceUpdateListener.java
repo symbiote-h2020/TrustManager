@@ -1,7 +1,6 @@
 package eu.h2020.symbiote.tm.interfaces.listeners;
 
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.model.internal.CloudResource;
@@ -17,13 +17,14 @@ import eu.h2020.symbiote.cloud.model.internal.ResourcesAddedOrUpdatedMessage;
 import eu.h2020.symbiote.cloud.model.internal.ResourcesDeletedMessage;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry.Type;
+import eu.h2020.symbiote.model.mim.Federation;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 import eu.h2020.symbiote.util.RabbitConstants;
 
 /**
  * @author RuggenthalerC
  *
- *         AMQP listener endpoints for resource updates from SM and PR.
+ *         AMQP listener endpoints for platform & resource updates from SM, PR & FM.
  */
 @Service
 public class ResourceUpdateListener {
@@ -32,26 +33,47 @@ public class ResourceUpdateListener {
 	@Autowired
 	private TrustRepository trustRepository;
 
+	@Value("${platform.id")
+	private String ownPlatformId;
+
 	/**
-	 * Receives own resource sharing updates from RH.
+	 * Receives own resource registration updates from RH.
 	 * 
-	 * @param sharedResourceMap
+	 * @param registeredResList
 	 */
-	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY
-			+ "}", type = RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY), key = "${" + RabbitConstants.ROUTING_KEY_RH_SHARED_PROPERTY + "}"))
-	public void receiveOwnSharedResources(Map<String, List<CloudResource>> sharedResourceMap) {
-		// TODO: add storage
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
+			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${" + RabbitConstants.ROUTING_KEY_RH_UPDATED_PROPERTY + "}"))
+	public void receiveOwnSharedResources(List<CloudResource> registeredResList) {
+		if (registeredResList != null) {
+			registeredResList.forEach(cr -> {
+				if (cr != null) {
+					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, ownPlatformId, cr.getInternalId(), null);
+					// add new entry if not exists
+					if (!trustRepository.exists(te.getId())) {
+						// Store empty own resource trust object -> cron will update resource trust
+						trustRepository.save(te);
+						logger.debug("Added own resource: internalId {} from platform {}", te.getResourceId(), te.getPlatformId());
+					}
+				}
+			});
+		}
 	}
 
 	/**
-	 * Receives own resource unsharing updates from RH.
+	 * Receives own resource deletion updates from RH.
 	 * 
-	 * @param unsharedResourceMap
+	 * @param deletedResList
 	 */
-	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY
-			+ "}", type = RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY), key = "${" + RabbitConstants.ROUTING_KEY_RH_UNSHARED_PROPERTY + "}"))
-	public void receiveOwnUnsharedResources(Map<String, List<String>> sharedResourceMap) {
-		// TODO: add removal
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
+			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${" + RabbitConstants.ROUTING_KEY_RH_DELETED_PROPERTY + "}"))
+	public void receiveOwnUnsharedResources(List<String> deletedResList) {
+		if (deletedResList != null) {
+			deletedResList.forEach(resId -> {
+				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, ownPlatformId, resId, null);
+				trustRepository.delete(te.getId());
+				logger.debug("Deleted own resource: internalId {} from platform {}", te.getResourceId(), te.getPlatformId());
+			});
+		}
 	}
 
 	/**
@@ -59,16 +81,21 @@ public class ResourceUpdateListener {
 	 * 
 	 * @param sharedResources
 	 */
-	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY
-			+ "}", type = RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY), key = "${rabbit.routingKey.platformRegistry.addOrUpdateFederatedResources}"))
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
+			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.addOrUpdateFederatedResources}"))
 	public void receiveForeignSharedResources(ResourcesAddedOrUpdatedMessage sharedResources) {
-		sharedResources.getNewFederatedResources().forEach(res -> {
-			TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), res.getSymbioteId(),
-					res.getCloudResource().getFederationInfo().getResourceTrust());
-			trustRepository.save(te);
-			logger.debug("Updated foreign resource trust value: resource {} with score {} from platform {}", te.getResourceId(), te.getValue(),
-					te.getPlatformId());
-		});
+		if (sharedResources != null && sharedResources.getNewFederatedResources() != null) {
+			sharedResources.getNewFederatedResources().forEach(res -> {
+				if (res != null && res.getCloudResource() != null && res.getCloudResource().getFederationInfo() != null) {
+					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), res.getCloudResource().getFederationInfo().getSymbioteId(),
+							res.getCloudResource().getFederationInfo().getResourceTrust());
+					// Store shared foreign resource trust object
+					trustRepository.save(te);
+					logger.debug("Updated foreign resource trust value: resource {} with score {} from platform {}", te.getResourceId(), te.getValue(),
+							te.getPlatformId());
+				}
+			});
+		}
 	}
 
 	/**
@@ -77,12 +104,48 @@ public class ResourceUpdateListener {
 	 * @param unsharedResources
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_PLATFORM_REGISTRY_TYPE_PROPERTY
-			+ "}", type = RabbitConstants.EXCHANGE_PLATFORM_REGISTRY_TYPE_PROPERTY), key = "${rabbit.routingKey.platformRegistry.removeFederatedResources}"))
+			+ "}", type = "${" + RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.removeFederatedResources}"))
 	public void receiveForeignUnsharedResources(ResourcesDeletedMessage unsharedResources) {
-		unsharedResources.getDeletedFederatedResourcesMap().keySet().forEach(resId -> {
-			TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, null, resId, null);
-			trustRepository.delete(te.getId());
-			logger.debug("Removed foreign resource trust value: resource {}", te.getResourceId());
-		});
+		if (unsharedResources != null && unsharedResources.getDeletedFederatedResourcesMap() != null) {
+			unsharedResources.getDeletedFederatedResourcesMap().keySet().forEach(resId -> {
+				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, null, resId, null);
+				trustRepository.delete(te.getId());
+				logger.debug("Removed foreign resource trust value: resource {}", te.getResourceId());
+			});
+		}
+	}
+
+	/**
+	 * Receives created federation requests.
+	 * 
+	 * @param fed
+	 */
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.federation}", type = "${rabbit.exchange.federation.type}"), key = "${rabbit.routingKey.federation.created}"))
+	public void receiveFederationCreated(Federation fed) {
+		updatePlatformEntries(fed);
+	}
+
+	/**
+	 * Receives updated federation requests.
+	 * 
+	 * @param fed
+	 */
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.federation}", type = "${rabbit.exchange.federation.type}"), key = "${rabbit.routingKey.federation.changed}"))
+	public void receiveFederationUpdated(Federation fed) {
+		updatePlatformEntries(fed);
+	}
+
+	private void updatePlatformEntries(Federation fed) {
+		if (fed != null && fed.getMembers() != null) {
+			fed.getMembers().forEach(fedMem -> {
+				TrustEntry te = new TrustEntry(fedMem.getPlatformId(), null);
+				// add new entry if not exists
+				if (!trustRepository.exists(te.getId())) {
+					// Store empty reputation trust object -> cron will update resource trust
+					trustRepository.save(te);
+					logger.debug("Added federated platform {} from federation {}", te.getPlatformId(), fed.getId());
+				}
+			});
+		}
 	}
 }
