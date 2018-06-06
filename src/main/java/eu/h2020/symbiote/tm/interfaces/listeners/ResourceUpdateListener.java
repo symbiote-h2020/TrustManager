@@ -48,7 +48,7 @@ public class ResourceUpdateListener {
 		if (registeredResList != null) {
 			registeredResList.forEach(cr -> {
 				if (cr != null) {
-					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, ownPlatformId, cr.getInternalId(), null);
+					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, ownPlatformId, cr.getInternalId());
 					// add new entry if not exists
 					if (!trustRepository.exists(te.getId())) {
 						// Store empty own resource trust object -> cron will update resource trust
@@ -71,7 +71,7 @@ public class ResourceUpdateListener {
 	public void receiveOwnUnsharedResources(List<String> deletedResList) {
 		if (deletedResList != null) {
 			deletedResList.forEach(resId -> {
-				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, ownPlatformId, resId, null);
+				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, ownPlatformId, resId);
 				trustRepository.delete(te.getId());
 				logger.debug("Deleted own resource: internalId {} from platform {}", te.getResourceId(), te.getPlatformId());
 			});
@@ -90,8 +90,8 @@ public class ResourceUpdateListener {
 		if (sharedResources != null && sharedResources.getNewFederatedResources() != null) {
 			sharedResources.getNewFederatedResources().forEach(res -> {
 				if (res != null && res.getCloudResource() != null && res.getCloudResource().getFederationInfo() != null) {
-					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), res.getCloudResource().getFederationInfo().getSymbioteId(),
-							res.getCloudResource().getFederationInfo().getResourceTrust());
+					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), res.getCloudResource().getFederationInfo().getSymbioteId());
+					te.updateEntry(res.getCloudResource().getFederationInfo().getResourceTrust());
 					// Store shared foreign resource trust object
 					trustRepository.save(te);
 					logger.debug("Updated foreign resource trust value: resource {} with score {} from platform {}", te.getResourceId(), te.getValue(),
@@ -112,7 +112,7 @@ public class ResourceUpdateListener {
 	public void receiveForeignUnsharedResources(ResourcesDeletedMessage unsharedResources) {
 		if (unsharedResources != null && unsharedResources.getDeletedFederatedResourcesMap() != null) {
 			unsharedResources.getDeletedFederatedResourcesMap().keySet().forEach(resId -> {
-				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, null, resId, null);
+				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, null, resId);
 				trustRepository.delete(te.getId());
 				logger.debug("Removed foreign resource trust value: resource {}", te.getResourceId());
 			});
@@ -144,7 +144,7 @@ public class ResourceUpdateListener {
 	private void updatePlatformEntries(Federation fed) {
 		if (fed != null && fed.getMembers() != null) {
 			fed.getMembers().forEach(fedMem -> {
-				TrustEntry te = new TrustEntry(fedMem.getPlatformId(), null);
+				TrustEntry te = new TrustEntry(Type.PLATFORM_REPUTATION, fedMem.getPlatformId(), null);
 				// add new entry if not exists
 				if (!trustRepository.exists(te.getId())) {
 					// Store empty reputation trust object -> cron will update resource trust

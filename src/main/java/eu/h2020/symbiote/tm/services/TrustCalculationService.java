@@ -34,23 +34,59 @@ public class TrustCalculationService {
 	 * 
 	 * @param resId
 	 *            internal resource ID
-	 * @return resource trust value double value between 0 - 100
+	 * @return resource trust value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcResourceTrust(String resId) {
 		// TODO: Add logic
-		return null;
+		return formatValue(null);
 	}
 
 	/**
 	 * Calculates adaptive resource trust for given symbiote resource ID.
 	 * 
+	 * @param curArtValue
+	 *            current adaptive resource trust value
 	 * @param resId
 	 *            symbIoTe ID
-	 * @return adaptive resource trust value double value between 0 - 100
+	 * @param platformId
+	 *            platform ID
+	 * @return adaptive resource trust value double value between 0 - 100 or null if not specified.
 	 */
-	public Double calcAdaptiveResourceTrust(String resId) {
-		// TODO: Add logic
-		return null;
+	public Double calcAdaptiveResourceTrust(Double curArtValue, String resId, String platformId) {
+		Double artValue = null;
+
+		TrustEntry rtEntry = trustRepository.getRTEntryByResourceId(resId);
+		TrustEntry prEntry = trustRepository.getPREntryByPlatformId(platformId);
+
+		// only process if both metrics are available
+		if (rtEntry != null && rtEntry.getValue() != null && prEntry != null && prEntry.getValue() != null) {
+			artValue = rtEntry.getValue() * calcConfidenceFactor(prEntry.getValue());
+
+			if (curArtValue != null) {
+				artValue = (artValue + curArtValue) / 2;
+			}
+		}
+
+		return formatValue(artValue);
+	}
+
+	private Double calcConfidenceFactor(Double prValue) {
+		if (prValue.compareTo(90.0) > 0)
+			return 1.0;
+
+		if (prValue.compareTo(70.0) > 0)
+			return 0.95;
+
+		if (prValue.compareTo(50.0) > 0)
+			return 0.8;
+
+		if (prValue.compareTo(30.0) > 0)
+			return 0.6;
+
+		if (prValue.compareTo(10.0) > 0)
+			return 0.3;
+
+		return 0.1;
 	}
 
 	/**
@@ -58,15 +94,11 @@ public class TrustCalculationService {
 	 * 
 	 * @param platformId
 	 *            platform ID
-	 * @return platform reputation value double value between 0 - 100
+	 * @return platform reputation value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcPlatformReputation(String platformId) {
 		Double fhScore = getFederationHistoryScore(platformId);
-
-		Double score = roundTo2Digits(fhScore);
-		logger.debug("Calculated Platform reputation for platform {} with score {}", platformId, score);
-		trustRepository.save(new TrustEntry(platformId, score));
-		return score;
+		return formatValue(fhScore);
 	}
 
 	private Double getFederationHistoryScore(String platformId) {
@@ -94,7 +126,7 @@ public class TrustCalculationService {
 
 	}
 
-	private Double roundTo2Digits(Double val) {
+	private Double formatValue(Double val) {
 		DecimalFormat rounded = new DecimalFormat("#.##");
 		return val != null ? Double.valueOf(rounded.format(val)) : null;
 	}
