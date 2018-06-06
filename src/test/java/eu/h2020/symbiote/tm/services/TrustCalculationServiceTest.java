@@ -17,7 +17,7 @@ import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 @RunWith(SpringRunner.class)
-public class TrustServiceTest {
+public class TrustCalculationServiceTest {
 
 	@Mock
 	private TrustAMQPService amqpService;
@@ -26,14 +26,14 @@ public class TrustServiceTest {
 	private TrustRepository repository;
 
 	@InjectMocks
-	private final TrustService service = new TrustService();
+	private final TrustCalculationService service = new TrustCalculationService();
 
 	@Test
 	public void TestGetPlatformReputationNull() {
 		String pId = "p-123";
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null);
 
-		Double val = service.getPlatformReputation(pId);
+		Double val = service.calcPlatformReputation(pId);
 
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
 		assertEquals(Double.valueOf(0.0), val);
@@ -44,7 +44,7 @@ public class TrustServiceTest {
 		String pId = "p-123";
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(new ArrayList<>());
 
-		Double val = service.getPlatformReputation(pId);
+		Double val = service.calcPlatformReputation(pId);
 
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
 		assertEquals(Double.valueOf(0.0), val);
@@ -57,7 +57,7 @@ public class TrustServiceTest {
 		List<FederationHistory> fhList = generateHistory();
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(fhList);
 
-		Double val = service.getPlatformReputation(pId);
+		Double val = service.calcPlatformReputation(pId);
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
 		assertEquals(Double.valueOf(10), val);
 	}

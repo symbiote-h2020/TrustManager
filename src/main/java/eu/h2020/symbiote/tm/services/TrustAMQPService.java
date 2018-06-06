@@ -50,7 +50,7 @@ public class TrustAMQPService {
 	 * 
 	 * @param trustObj
 	 */
-	public void publishResourceTrustUpdated(TrustEntry trustObj) {
+	public void publishResourceTrustUpdate(TrustEntry trustObj) {
 		send(routingKeyResTrustUpdated, trustObj);
 	}
 
@@ -59,7 +59,7 @@ public class TrustAMQPService {
 	 * 
 	 * @param trustObj
 	 */
-	public void publishPlatformReputationUpdated(TrustEntry trustObj) {
+	public void publishPlatformReputationUpdate(TrustEntry trustObj) {
 		send(routingKeyPlatfRepUpdated, trustObj);
 	}
 
@@ -68,7 +68,7 @@ public class TrustAMQPService {
 	 * 
 	 * @param trustObj
 	 */
-	public void publishAdaptiveResourceTrustUpdated(TrustEntry trustObj) {
+	public void publishAdaptiveResourceTrustUpdate(TrustEntry trustObj) {
 		send(routingKeyAdaptiveResTrustUpdated, trustObj);
 	}
 
