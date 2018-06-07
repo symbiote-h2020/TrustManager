@@ -91,7 +91,8 @@ public class ResourceUpdateListener {
 			sharedResources.getNewFederatedResources().forEach(res -> {
 				if (res != null && res.getCloudResource() != null && res.getCloudResource().getFederationInfo() != null) {
 					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), res.getCloudResource().getFederationInfo().getSymbioteId());
-					te.updateEntry(res.getCloudResource().getFederationInfo().getResourceTrust());
+					te.updateEntry(sanitizeValue(res.getCloudResource().getFederationInfo().getResourceTrust()));
+
 					// Store shared foreign resource trust object
 					trustRepository.save(te);
 					logger.debug("Updated foreign resource trust value: resource {} with score {} from platform {}", te.getResourceId(), te.getValue(),
@@ -99,6 +100,13 @@ public class ResourceUpdateListener {
 				}
 			});
 		}
+	}
+
+	private Double sanitizeValue(Double val) {
+		if (val != null && !val.isNaN()) {
+			return Math.min(Math.max(val, 0), 100);
+		}
+		return null;
 	}
 
 	/**
