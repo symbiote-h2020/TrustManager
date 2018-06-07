@@ -3,6 +3,8 @@ package eu.h2020.symbiote.tm.interfaces.rest;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import eu.h2020.symbiote.cloud.monitoring.model.AggregatedMetrics;
  */
 @Service
 public class RestConsumer {
+	private static final Logger logger = LoggerFactory.getLogger(RestConsumer.class);
 
 	@Value("${symbIoTe.monitoring.url}")
 	private String monitoringUrl;
@@ -34,20 +37,32 @@ public class RestConsumer {
 	private RestTemplate restTemplate;
 
 	public Double fetchResourceAvailabilityMetrics(String resId) {
-		List<AggregatedMetrics> resp = restTemplate.getForObject(monitoringUrl + "?device=" + resId, List.class);
-		AggregatedMetrics am = resp.get(0);
+		try {
+			List<AggregatedMetrics> resp = restTemplate.getForObject(monitoringUrl + "?device=" + resId, List.class);
+			AggregatedMetrics am = resp.get(0);
+		} catch (Exception e) {
+			logger.warn("Fetching stats from Monitoring failed", e);
+		}
 
 		return null;
 	}
 
 	public Double fetchPlatformADStats(String platformId) {
-		Map resp = restTemplate.getForObject(coreAdUrl + "?platformId=" + platformId + "&searchOriginPlatformId=" + ownPlatformId, Map.class);
+		try {
+			Map resp = restTemplate.getForObject(coreAdUrl + "?platformId=" + platformId + "&searchOriginPlatformId=" + ownPlatformId, Map.class);
+		} catch (Exception e) {
+			logger.warn("Fetching stats from Core AD failed", e);
+		}
 
 		return null;
 	}
 
 	public Double fetchBarteringStats(String platformId) {
-		// Map resp = restTemplate.getForObject(coreBarteringUrl + "?platformId=" + platformId + "&searchOriginPlatformId=" + ownPlatformId, Map.class);
+		try {
+			// Map resp = restTemplate.getForObject(coreBarteringUrl + "?platformId=" + platformId + "&searchOriginPlatformId=" + ownPlatformId, Map.class);
+		} catch (Exception e) {
+			logger.warn("Fetching stats from Core Bartering failed", e);
+		}
 
 		return null;
 	}

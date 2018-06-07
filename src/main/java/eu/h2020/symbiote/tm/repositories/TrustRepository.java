@@ -23,7 +23,7 @@ public interface TrustRepository extends MongoRepository<TrustEntry, String> {
 	 *            {@link TrustEntry.Type}
 	 * @return list of {@link TrustEntry}
 	 */
-	@Query("{'last_update': {$lte: ?0}}, 'type' : ?1")
+	@Query("{'lastUpdate': {$lte: ?0}, 'type' : ?1}")
 	List<TrustEntry> findEntriesUpdatedAfter(Date updatedAfter, TrustEntry.Type type);
 
 	/**
@@ -33,7 +33,7 @@ public interface TrustRepository extends MongoRepository<TrustEntry, String> {
 	 *            resource ID
 	 * @return {@link TrustEntry}
 	 */
-	@Query("'resource_id' : ?0, 'type' : 'RESOURCE_TRUST'")
+	@Query("{'resourceId' : ?0, 'type' : 'RESOURCE_TRUST'}")
 	TrustEntry getRTEntryByResourceId(String resId);
 
 	/**
@@ -43,7 +43,7 @@ public interface TrustRepository extends MongoRepository<TrustEntry, String> {
 	 *            platform ID
 	 * @return {@link TrustEntry}
 	 */
-	@Query("'platform_id' : ?0, 'type' : 'PLATFORM_REPUTATION'")
+	@Query("{'platformId' : ?0, 'type' : 'PLATFORM_REPUTATION'}")
 	TrustEntry getPREntryByPlatformId(String platformId);
 
 	/**
@@ -53,6 +53,6 @@ public interface TrustRepository extends MongoRepository<TrustEntry, String> {
 	 *            resource ID
 	 * @return {@link TrustEntry}
 	 */
-	@Query("'resource_id' : ?0, 'type' : 'ADAPTIVE_RESOURCE_TRUST'")
+	@Query("{'resourceId' : ?0, 'type' : 'ADAPTIVE_RESOURCE_TRUST'}")
 	TrustEntry getARTEntryByResourceId(String resId);
 }
