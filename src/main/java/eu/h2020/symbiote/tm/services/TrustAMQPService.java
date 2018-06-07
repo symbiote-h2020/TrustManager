@@ -76,7 +76,7 @@ public class TrustAMQPService {
 	}
 
 	private void send(String routingKey, TrustEntry trustObj) {
-		logger.debug("Message published with routingkey {}. Type: {}, PlatformId: {}, ResourceId: {}, value: {}, ", routingKey, trustObj.getType(),
+		logger.debug("Message published with routingkey {}. Type: {}, PlatformId: {}, ResourceId: {}, value: {}", routingKey, trustObj.getType(),
 				trustObj.getPlatformId(), trustObj.getResourceId(), trustObj.getValue());
 		template.convertAndSend(trustTopic.getName(), routingKey, trustObj);
 	}

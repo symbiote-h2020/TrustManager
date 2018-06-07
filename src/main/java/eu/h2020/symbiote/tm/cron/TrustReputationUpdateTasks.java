@@ -52,8 +52,8 @@ public class TrustReputationUpdateTasks {
 
 			if (shouldPublishUpdate(curVal, entry.getValue())) {
 				amqpService.publishResourceTrustUpdate(entry);
+				logger.debug("Resource Trust for resource {} updated: {} to {}", entry.getResourceId(), curVal, entry.getValue());
 			}
-			logger.debug("Resource Trust for resource {} updated: {} to {}", entry.getResourceId(), curVal, entry.getValue());
 		});
 	}
 
@@ -70,8 +70,8 @@ public class TrustReputationUpdateTasks {
 
 			if (shouldPublishUpdate(curVal, entry.getValue())) {
 				amqpService.publishPlatformReputationUpdate(entry);
+				logger.debug("Platform Reputation for platform {} updated: {} to {}", entry.getPlatformId(), curVal, entry.getValue());
 			}
-			logger.debug("Platform Reputation for platform {} updated: {} to {}", entry.getPlatformId(), curVal, entry.getValue());
 		});
 	}
 
@@ -88,8 +88,8 @@ public class TrustReputationUpdateTasks {
 
 			if (shouldPublishUpdate(curVal, entry.getValue())) {
 				amqpService.publishAdaptiveResourceTrustUpdate(entry);
+				logger.debug("Adaptive Resource Trust for resource {} updated: {} to {}", entry.getResourceId(), curVal, entry.getValue());
 			}
-			logger.debug("Adaptive Resource Trust for resource {} updated: {} to {}", entry.getResourceId(), curVal, entry.getValue());
 		});
 	}
 
