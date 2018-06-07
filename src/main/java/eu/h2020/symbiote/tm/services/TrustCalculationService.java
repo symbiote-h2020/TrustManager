@@ -41,10 +41,13 @@ public class TrustCalculationService {
 	 * @return resource trust value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcResourceTrust(String resId) {
-		Double rt = restConsumer.fetchResourceAvailabilityMetrics(resId);
-
-		// TODO: Add logic
+		Double rt = getMonitoringScore(resId);
 		return formatValue(rt);
+	}
+
+	private Double getMonitoringScore(String resId) {
+		Double availScore = restConsumer.fetchResourceAvailabilityMetrics(resId);
+		return availScore * 100;
 	}
 
 	/**

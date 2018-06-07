@@ -36,10 +36,18 @@ public class RestConsumer {
 	@Autowired
 	private RestTemplate restTemplate;
 
+	/**
+	 * @param resId
+	 *            internal resource ID
+	 * @return returns the availability in range 0 - 1
+	 */
 	public Double fetchResourceAvailabilityMetrics(String resId) {
 		try {
-			List<AggregatedMetrics> resp = restTemplate.getForObject(monitoringUrl + "?device=" + resId, List.class);
-			AggregatedMetrics am = resp.get(0);
+			List<AggregatedMetrics> resp = restTemplate.getForObject(monitoringUrl + "?metric=availability&operation=avg&device=" + resId, List.class);
+
+			if (resp != null && !resp.isEmpty()) {
+				return resp.get(0).getStatistics().get("avg");
+			}
 		} catch (Exception e) {
 			logger.warn("Fetching stats from Monitoring failed", e);
 		}
