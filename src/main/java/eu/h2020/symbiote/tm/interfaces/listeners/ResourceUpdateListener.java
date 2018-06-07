@@ -84,8 +84,8 @@ public class ResourceUpdateListener {
 	 * @param sharedResources
 	 *            shared resource message
 	 */
-	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_RH_NAME_PROPERTY + "}", type = "${"
-			+ RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.addOrUpdateFederatedResources}"))
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_PLATFORM_REGISTRY_TYPE_PROPERTY
+			+ "}", type = "${" + RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.addOrUpdateFederatedResources}"))
 	public void receiveForeignSharedResources(ResourcesAddedOrUpdatedMessage sharedResources) {
 		if (sharedResources != null && sharedResources.getNewFederatedResources() != null) {
 			sharedResources.getNewFederatedResources().forEach(res -> {

@@ -24,8 +24,8 @@ import eu.h2020.symbiote.tm.services.TrustCalculationService;
  *
  */
 @Component
-public class TrustReputationUpdateJobs {
-	private static final Logger logger = LoggerFactory.getLogger(TrustReputationUpdateJobs.class);
+public class TrustReputationUpdateTasks {
+	private static final Logger logger = LoggerFactory.getLogger(TrustReputationUpdateTasks.class);
 
 	@Value("${symbIoTe.trust.update.interval}")
 	private Integer interval;

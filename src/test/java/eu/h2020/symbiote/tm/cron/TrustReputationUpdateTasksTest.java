@@ -20,7 +20,7 @@ import eu.h2020.symbiote.tm.services.TrustAMQPService;
 import eu.h2020.symbiote.tm.services.TrustCalculationService;
 
 @RunWith(SpringRunner.class)
-public class TrustReputationUpdateJobsTest {
+public class TrustReputationUpdateTasksTest {
 	@Mock
 	private TrustAMQPService amqpService;
 
@@ -31,7 +31,7 @@ public class TrustReputationUpdateJobsTest {
 	private TrustRepository trustRepository;
 
 	@InjectMocks
-	private final TrustReputationUpdateJobs service = new TrustReputationUpdateJobs();
+	private final TrustReputationUpdateTasks service = new TrustReputationUpdateTasks();
 
 	@Before
 	public void setup() throws Exception {

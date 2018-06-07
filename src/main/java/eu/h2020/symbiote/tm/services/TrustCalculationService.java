@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
+import eu.h2020.symbiote.tm.interfaces.rest.RestConsumer;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 /**
@@ -27,6 +28,9 @@ public class TrustCalculationService {
 	private TrustAMQPService amqpService;
 
 	@Autowired
+	private RestConsumer restConsumer;
+
+	@Autowired
 	private TrustRepository trustRepository;
 
 	/**
@@ -37,8 +41,10 @@ public class TrustCalculationService {
 	 * @return resource trust value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcResourceTrust(String resId) {
+		Double rt = restConsumer.fetchResourceAvailabilityMetrics(resId);
+
 		// TODO: Add logic
-		return formatValue(null);
+		return formatValue(rt);
 	}
 
 	/**
@@ -53,18 +59,22 @@ public class TrustCalculationService {
 	 * @return adaptive resource trust value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcAdaptiveResourceTrust(Double curArtValue, String resId, String platformId) {
-		Double artValue = null;
-
 		TrustEntry rtEntry = trustRepository.getRTEntryByResourceId(resId);
 		TrustEntry prEntry = trustRepository.getPREntryByPlatformId(platformId);
 
-		// only process if both metrics are available
-		if (rtEntry != null && rtEntry.getValue() != null && prEntry != null && prEntry.getValue() != null) {
-			artValue = rtEntry.getValue() * calcConfidenceFactor(prEntry.getValue());
+		if (rtEntry == null || rtEntry.getValue() == null) {
+			logger.warn("Shared resource trust for resource {} does not exist", resId);
+			return null;
+		}
 
-			if (curArtValue != null) {
-				artValue = (artValue + curArtValue) / 2;
-			}
+		if (prEntry == null || prEntry.getValue() == null) {
+			logger.warn("Platform reputation for platform {} does not exist", platformId);
+			return null;
+		}
+
+		Double artValue = rtEntry.getValue() * calcConfidenceFactor(prEntry.getValue());
+		if (curArtValue != null) {
+			artValue = (artValue + curArtValue) / 2;
 		}
 
 		return formatValue(artValue);
@@ -98,21 +108,36 @@ public class TrustCalculationService {
 	 */
 	public Double calcPlatformReputation(String platformId) {
 		Double fhScore = getFederationHistoryScore(platformId);
+		Double bScore = getBarteringScore(platformId);
+		Double adScore = getADStatsScore(platformId);
+
+		// TODO: Add logic
 		return formatValue(fhScore);
+	}
+
+	private Double getADStatsScore(String platformId) {
+		Double adScore = restConsumer.fetchPlatformADStats(platformId);
+		// TODO: Add logic
+		return adScore;
+	}
+
+	private Double getBarteringScore(String platformId) {
+		Double bScore = restConsumer.fetchBarteringStats(platformId);
+		// TODO: Add logic
+		return bScore;
 	}
 
 	private Double getFederationHistoryScore(String platformId) {
 		List<FederationHistory> fh = amqpService.fetchFederationHistory(platformId);
-		Double score = 0.0;
-
 		if (fh != null && !fh.isEmpty()) {
+			Double score = 0.0;
 			for (FederationHistory h : fh) {
 				score += calcHistoryEntry(h);
 			}
-			score = score / fh.size();
+			return score / fh.size() * 100;
 		}
 
-		return score * 100;
+		return null;
 	}
 
 	private Double calcHistoryEntry(FederationHistory h) {
@@ -123,7 +148,6 @@ public class TrustCalculationService {
 		platPeriod = platPeriod - h.getDatePlatformJoined().getTime();
 
 		return platPeriod.doubleValue() / fedPeriod.doubleValue();
-
 	}
 
 	private Double formatValue(Double val) {

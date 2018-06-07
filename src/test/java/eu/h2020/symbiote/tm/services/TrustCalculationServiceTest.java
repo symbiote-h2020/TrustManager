@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
+import eu.h2020.symbiote.tm.interfaces.rest.RestConsumer;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 @RunWith(SpringRunner.class)
@@ -21,6 +22,9 @@ public class TrustCalculationServiceTest {
 
 	@Mock
 	private TrustAMQPService amqpService;
+
+	@Mock
+	private RestConsumer restConsumer;
 
 	@Mock
 	private TrustRepository repository;
@@ -36,7 +40,7 @@ public class TrustCalculationServiceTest {
 		Double val = service.calcPlatformReputation(pId);
 
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
-		assertEquals(Double.valueOf(0.0), val);
+		assertEquals(null, val);
 	}
 
 	@Test
@@ -47,7 +51,7 @@ public class TrustCalculationServiceTest {
 		Double val = service.calcPlatformReputation(pId);
 
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
-		assertEquals(Double.valueOf(0.0), val);
+		assertEquals(null, val);
 	}
 
 	@Test
