@@ -71,7 +71,7 @@ public class TrustReputationUpdateTasks {
 			if (shouldPublishUpdate(curVal, entry.getValue())) {
 				amqpService.publishPlatformReputationUpdate(entry);
 			}
-			logger.debug("Platform Reputation for platform {} updated: {} to {}", entry.getResourceId(), curVal, entry.getValue());
+			logger.debug("Platform Reputation for platform {} updated: {} to {}", entry.getPlatformId(), curVal, entry.getValue());
 		});
 	}
 
@@ -104,6 +104,6 @@ public class TrustReputationUpdateTasks {
 			return !curVal.equals(newVal);
 		}
 
-		return true;
+		return newVal != null;
 	}
 }

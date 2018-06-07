@@ -47,7 +47,7 @@ public class TrustCalculationService {
 
 	private Double getMonitoringScore(String resId) {
 		Double availScore = restConsumer.fetchResourceAvailabilityMetrics(resId);
-		return availScore * 100;
+		return availScore != null ? availScore * 100 : null;
 	}
 
 	/**
