@@ -46,7 +46,7 @@ public class TrustCalculationService {
 	}
 
 	private Double getMonitoringScore(String resId) {
-		Double availScore = restConsumer.fetchResourceAvailabilityMetrics(resId);
+		Double availScore = restConsumer.getResourceAvailabilityMetrics(resId);
 		return availScore != null ? availScore * 100 : null;
 	}
 
@@ -119,13 +119,13 @@ public class TrustCalculationService {
 	}
 
 	private Double getADStatsScore(String platformId) {
-		Double adScore = restConsumer.fetchPlatformADStats(platformId);
+		Double adScore = restConsumer.getPlatformADStats(platformId);
 		// TODO: Add logic
 		return adScore;
 	}
 
 	private Double getBarteringScore(String platformId) {
-		Double bScore = restConsumer.fetchBarteringStats(platformId);
+		Double bScore = restConsumer.getBarteringStats(platformId);
 		// TODO: Add logic
 		return bScore;
 	}
