@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
-import eu.h2020.symbiote.tm.interfaces.rest.RestConsumer;
+import eu.h2020.symbiote.tm.interfaces.rest.TrustStatsLoader;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 @RunWith(SpringRunner.class)
@@ -25,7 +25,7 @@ public class TrustCalculationServiceTest {
 	private TrustAMQPService amqpService;
 
 	@Mock
-	private RestConsumer restConsumer;
+	private TrustStatsLoader trustStatsLoader;
 
 	@Mock
 	private TrustRepository repository;
@@ -36,31 +36,27 @@ public class TrustCalculationServiceTest {
 	@Test
 	public void testGetPlatformReputationNull() {
 		String pId = "p-123";
-		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null);
+		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null).thenReturn(new ArrayList<>());
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(null);
 
 		Double val = service.calcPlatformReputation(pId);
 
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
 		assertEquals(null, val);
-	}
 
-	@Test
-	public void testGetPlatformReputationNoEntries() {
-		String pId = "p-123";
-		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(new ArrayList<>());
-
-		Double val = service.calcPlatformReputation(pId);
-
-		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
+		val = service.calcPlatformReputation(pId);
 		assertEquals(null, val);
 	}
 
 	@Test
-	public void testGetPlatformReputationEntries() {
+	public void testGetPlatformReputationFh() {
 		String pId = "p-123";
 
 		List<FederationHistory> fhList = generateHistory();
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(fhList);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(null);
 
 		Double val = service.calcPlatformReputation(pId);
 		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
@@ -68,8 +64,42 @@ public class TrustCalculationServiceTest {
 	}
 
 	@Test
+	public void testGetPlatformReputationBt() {
+		String pId = "p-123";
+		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(55.0);
+		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(null);
+
+		Double val = service.calcPlatformReputation(pId);
+		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
+		assertEquals(Double.valueOf(55), val);
+	}
+
+	@Test
+	public void testGetPlatformReputationAd() {
+		String pId = "p-123";
+		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(9).thenReturn(99).thenReturn(999).thenReturn(9999).thenReturn(99999)
+				.thenReturn(100000);
+
+		Double val = service.calcPlatformReputation(pId);
+		assertEquals(Double.valueOf(100), val);
+		val = service.calcPlatformReputation(pId);
+		assertEquals(Double.valueOf(95), val);
+		val = service.calcPlatformReputation(pId);
+		assertEquals(Double.valueOf(80), val);
+		val = service.calcPlatformReputation(pId);
+		assertEquals(Double.valueOf(60), val);
+		val = service.calcPlatformReputation(pId);
+		assertEquals(Double.valueOf(30), val);
+		val = service.calcPlatformReputation(pId);
+		assertEquals(Double.valueOf(10), val);
+	}
+
+	@Test
 	public void testCalcResourceTrust() {
-		Mockito.when(restConsumer.getResourceAvailabilityMetrics(Mockito.anyString())).thenReturn(null).thenReturn(0.8);
+		Mockito.when(trustStatsLoader.getResourceAvailabilityMetrics(Mockito.anyString())).thenReturn(null).thenReturn(0.8);
 
 		Double val = service.calcResourceTrust("r-123");
 		assertEquals(null, val);

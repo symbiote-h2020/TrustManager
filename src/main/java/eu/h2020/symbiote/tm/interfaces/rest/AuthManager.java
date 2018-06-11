@@ -45,7 +45,7 @@ public class AuthManager {
 	/**
 	 * Generates Security headers for response.
 	 * 
-	 * @return {@see HttpHeaders}
+	 * @return {@link HttpHeaders}
 	 */
 	public HttpHeaders generateRequestHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -72,7 +72,7 @@ public class AuthManager {
 	 * @param platformId
 	 *            platform ID or SecurityConstants.CORE_AAM_INSTANCE_ID for core.
 	 * @param httpHeaders
-	 *            received {@see HttpHeaders}
+	 *            received {@link HttpHeaders}
 	 * @return true if verified else false
 	 */
 	public boolean verifyResponseHeaders(String componentId, String platformId, HttpHeaders httpHeaders) {
@@ -86,5 +86,9 @@ public class AuthManager {
 		}
 
 		return isResponseVerified;
+	}
+
+	public IComponentSecurityHandler getSecurityHandler() {
+		return this.securityHandler;
 	}
 }

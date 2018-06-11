@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
-import eu.h2020.symbiote.tm.interfaces.rest.RestConsumer;
+import eu.h2020.symbiote.tm.interfaces.rest.TrustStatsLoader;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 /**
@@ -28,7 +28,7 @@ public class TrustCalculationService {
 	private TrustAMQPService amqpService;
 
 	@Autowired
-	private RestConsumer restConsumer;
+	private TrustStatsLoader trustStatsLoader;
 
 	@Autowired
 	private TrustRepository trustRepository;
@@ -46,7 +46,7 @@ public class TrustCalculationService {
 	}
 
 	private Double getMonitoringScore(String resId) {
-		Double availScore = restConsumer.getResourceAvailabilityMetrics(resId);
+		Double availScore = trustStatsLoader.getResourceAvailabilityMetrics(resId);
 		return availScore != null ? availScore * 100 : null;
 	}
 
@@ -110,22 +110,57 @@ public class TrustCalculationService {
 	 * @return platform reputation value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcPlatformReputation(String platformId) {
+		Double prVal = 0.0;
+		int cnt = 0;
 		Double fhScore = getFederationHistoryScore(platformId);
-		Double bScore = getBarteringScore(platformId);
+		Double btScore = getBarteringScore(platformId);
 		Double adScore = getADStatsScore(platformId);
 
-		// TODO: Add logic
-		return formatValue(fhScore);
+		if (fhScore != null) {
+			int fhFactor = 10;
+			prVal += fhScore * fhFactor;
+			cnt += fhFactor;
+		}
+		if (btScore != null) {
+			int btFactor = 5;
+			prVal += btScore * btFactor;
+			cnt += btFactor;
+		}
+		if (adScore != null) {
+			int adFactor = 1;
+			prVal += adScore * adFactor;
+			cnt += adFactor;
+		}
+
+		return cnt > 0 ? formatValue(prVal / cnt) : null;
 	}
 
 	private Double getADStatsScore(String platformId) {
-		Double adScore = restConsumer.getPlatformADStats(platformId);
-		// TODO: Add logic
-		return adScore;
+		Integer adHits = trustStatsLoader.getPlatformADStats(platformId);
+		return adHits != null ? calcADMetric(adHits) : null;
+	}
+
+	private Double calcADMetric(Integer prValue) {
+		if (prValue.compareTo(10) < 0)
+			return 100.0;
+
+		if (prValue.compareTo(100) < 0)
+			return 95.0;
+
+		if (prValue.compareTo(1000) < 0)
+			return 80.0;
+
+		if (prValue.compareTo(10000) < 0)
+			return 60.0;
+
+		if (prValue.compareTo(100000) < 0)
+			return 30.0;
+
+		return 10.0;
 	}
 
 	private Double getBarteringScore(String platformId) {
-		Double bScore = restConsumer.getBarteringStats(platformId);
+		Double bScore = trustStatsLoader.getBarteringStats(platformId);
 		// TODO: Add logic
 		return bScore;
 	}

@@ -16,27 +16,23 @@ import org.springframework.web.client.RestTemplate;
 
 import eu.h2020.symbiote.cloud.monitoring.model.AggregatedMetrics;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.communication.payloads.OriginPlatformGroupedPlatformMisdeedsReport;
+import eu.h2020.symbiote.security.handler.IComponentSecurityHandler;
 
 /**
  * @author RuggenthalerC
  *
- *         Handles fetching data via REST endpoints from other components.
+ *         Loads / fetching data via REST from other components for trust/reputation calculation.
  */
 @Service
-public class RestConsumer {
-	private static final Logger logger = LoggerFactory.getLogger(RestConsumer.class);
+public class TrustStatsLoader {
+	private static final Logger logger = LoggerFactory.getLogger(TrustStatsLoader.class);
 
 	@Value("${symbIoTe.monitoring.url}")
 	private String monitoringUrl;
 
-	@Value("${symbIoTe.core.ad.url}")
-	private String coreAdUrl;
-
 	@Value("${symbIoTe.core.bartering.url}")
 	private String coreBarteringUrl;
-
-	@Value("${platform.id")
-	private String ownPlatformId;
 
 	@Autowired
 	private AuthManager authManager;
@@ -72,20 +68,16 @@ public class RestConsumer {
 	 * 
 	 * @param platformId
 	 *            platform ID
-	 * @return returns the avg stats
+	 * @return returns the number of hits.
 	 */
-	@SuppressWarnings({ "rawtypes" })
-	public Double getPlatformADStats(String platformId) {
+	public Integer getPlatformADStats(String platformId) {
 		try {
-			String url = coreAdUrl + "?platformId=" + platformId + "&searchOriginPlatformId=" + ownPlatformId;
-			ResponseEntity<Map> resp = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(authManager.generateRequestHeaders()), Map.class);
+			IComponentSecurityHandler csh = authManager.getSecurityHandler();
+			Map<String, OriginPlatformGroupedPlatformMisdeedsReport> resp = csh.getOriginPlatformGroupedPlatformMisdeedsReports(platformId, null);
 
-			if (authManager.verifyResponseHeaders("ad", SecurityConstants.CORE_AAM_INSTANCE_ID, resp.getHeaders())) {
-				// TODO: Add logic
-			} else {
-				logger.warn("Response Header verification failed.");
+			if (resp != null && resp.get(platformId) != null) {
+				return resp.get(platformId).getTotalMisdeeds();
 			}
-
 		} catch (Exception e) {
 			logger.warn("Fetching stats from Core AD failed", e);
 		}

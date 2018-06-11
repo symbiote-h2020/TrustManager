@@ -24,7 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import eu.h2020.symbiote.cloud.monitoring.model.AggregatedMetrics;
 
 @RunWith(SpringRunner.class)
-public class RestConsumerTest {
+public class TrustStatsLoaderTest {
 	@Mock
 	private RestTemplate restTemplate;
 
@@ -32,14 +32,12 @@ public class RestConsumerTest {
 	private AuthManager authManager;
 
 	@InjectMocks
-	private final RestConsumer service = new RestConsumer();
+	private final TrustStatsLoader service = new TrustStatsLoader();
 
 	@Before
 	public void setup() throws Exception {
 		ReflectionTestUtils.setField(service, "monitoringUrl", "https://monitoringUrl");
-		ReflectionTestUtils.setField(service, "coreAdUrl", "https://coreAdUrl");
 		ReflectionTestUtils.setField(service, "coreBarteringUrl", "https://coreBarteringUrl");
-		ReflectionTestUtils.setField(service, "ownPlatformId", "123");
 	}
 
 	@Test
@@ -57,19 +55,6 @@ public class RestConsumerTest {
 		Double val = service.getResourceAvailabilityMetrics(resId);
 
 		assertEquals(Double.valueOf(12.0), val);
-	}
-
-	@Test
-	public void testFetchPlatformADStats() throws Exception {
-		String platformId = "p134";
-
-		Mockito.when(authManager.generateRequestHeaders()).thenReturn(null);
-		Mockito.when(restTemplate.getForObject("https://coreAdUrl?platformId=" + platformId + "&searchOriginPlatformId=123", Map.class))
-				.thenReturn(new HashMap<>());
-
-		Double val = service.getPlatformADStats(platformId);
-
-		assertEquals(null, val);
 	}
 
 	@Test
