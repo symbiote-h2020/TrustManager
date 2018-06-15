@@ -2,6 +2,7 @@ package eu.h2020.symbiote.tm.interfaces.rest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class TrustStatsLoader {
 	public Integer getPlatformADStats(String platformId) {
 		try {
 			IComponentSecurityHandler csh = authManager.getSecurityHandler();
-			Map<String, OriginPlatformGroupedPlatformMisdeedsReport> resp = csh.getOriginPlatformGroupedPlatformMisdeedsReports(platformId, null);
+			Map<String, OriginPlatformGroupedPlatformMisdeedsReport> resp = csh.getOriginPlatformGroupedPlatformMisdeedsReports(Optional.of(platformId), null);
 
 			if (resp != null && resp.get(platformId) != null) {
 				return resp.get(platformId).getTotalMisdeeds();
