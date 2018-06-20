@@ -89,14 +89,16 @@ public class ResourceUpdateListener {
 	public void receiveForeignSharedResources(ResourcesAddedOrUpdatedMessage sharedResources) {
 		if (sharedResources != null && sharedResources.getNewFederatedResources() != null) {
 			sharedResources.getNewFederatedResources().forEach(res -> {
-				if (res != null && res.getCloudResource() != null && res.getCloudResource().getFederationInfo() != null) {
-					TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), res.getCloudResource().getFederationInfo().getSymbioteId());
-					te.updateEntry(sanitizeValue(res.getCloudResource().getFederationInfo().getResourceTrust()));
-
-					// Store shared foreign resource trust object
-					trustRepository.save(te);
-					logger.debug("Updated foreign resource trust value: resource {} with score {} from platform {}", te.getResourceId(), te.getValue(),
-							te.getPlatformId());
+				if (res != null && res.getCloudResource() != null && res.getCloudResource().getFederationInfo() != null
+						&& res.getCloudResource().getFederationInfo().getSharingInformation() != null) {
+					res.getCloudResource().getFederationInfo().getSharingInformation().values().forEach(info -> {
+						TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, res.getPlatformId(), info.getSymbioteId());
+						te.updateEntry(sanitizeValue(res.getCloudResource().getFederationInfo().getResourceTrust()));
+						// Store shared foreign resource trust object
+						trustRepository.save(te);
+						logger.debug("Updated foreign resource trust value: resource {} with score {} from platform {}", te.getResourceId(), te.getValue(),
+								te.getPlatformId());
+					});
 				}
 			});
 		}
@@ -118,8 +120,8 @@ public class ResourceUpdateListener {
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${" + RabbitConstants.EXCHANGE_PLATFORM_REGISTRY_TYPE_PROPERTY
 			+ "}", type = "${" + RabbitConstants.EXCHANGE_RH_TYPE_PROPERTY + "}"), key = "${rabbit.routingKey.platformRegistry.removeFederatedResources}"))
 	public void receiveForeignUnsharedResources(ResourcesDeletedMessage unsharedResources) {
-		if (unsharedResources != null && unsharedResources.getDeletedFederatedResourcesMap() != null) {
-			unsharedResources.getDeletedFederatedResourcesMap().keySet().forEach(resId -> {
+		if (unsharedResources != null && unsharedResources.getDeletedFederatedResources() != null) {
+			unsharedResources.getDeletedFederatedResources().forEach(resId -> {
 				TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, null, resId);
 				trustRepository.delete(te.getId());
 				logger.debug("Removed foreign resource trust value: resource {}", te.getResourceId());

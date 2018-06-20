@@ -2,6 +2,7 @@ package eu.h2020.symbiote.tm.interfaces.listeners;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.h2020.symbiote.cloud.model.internal.CloudResource;
 import eu.h2020.symbiote.cloud.model.internal.FederatedResource;
 import eu.h2020.symbiote.cloud.model.internal.FederationInfoBean;
+import eu.h2020.symbiote.cloud.model.internal.ResourceSharingInformation;
 import eu.h2020.symbiote.cloud.model.internal.ResourcesAddedOrUpdatedMessage;
 import eu.h2020.symbiote.cloud.model.internal.ResourcesDeletedMessage;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
@@ -104,13 +106,20 @@ public class ResourceUpdateListenerTest {
 	public void testReceiveForeignSharedResources1() throws Exception {
 		FederationInfoBean fib = new FederationInfoBean();
 		fib.setResourceTrust(1.2);
-		fib.setSymbioteId("sr@345");
+
+		Map<String, ResourceSharingInformation> sharingInformation = new HashMap<>();
+		ResourceSharingInformation rsi = new ResourceSharingInformation();
+		rsi.setSymbioteId("sr@345");
+		sharingInformation.put("123", rsi);
+		fib.setSharingInformation(sharingInformation);
+
+		fib.setAggregationId("sr@345");
 		CloudResource cr = new CloudResource();
 		cr.setFederationInfo(fib);
 		Resource r = new Resource();
 		r.setInterworkingServiceURL("https://");
 		cr.setResource(r);
-		FederatedResource fr = new FederatedResource("sr@123", cr);
+		FederatedResource fr = new FederatedResource("sr@123", cr, 4.0);
 		List<FederatedResource> frList = new ArrayList<>();
 		frList.add(fr);
 
@@ -131,8 +140,8 @@ public class ResourceUpdateListenerTest {
 
 	@Test
 	public void testReceiveForeignUnsharedResources1() throws Exception {
-		Map<String, Set<String>> map = new HashMap<>();
-		map.put("r-123", null);
+		Set<String> map = new HashSet<String>();
+		map.add("r-123");
 		ResourcesDeletedMessage sr = new ResourcesDeletedMessage(map);
 
 		service.receiveForeignUnsharedResources(sr);
