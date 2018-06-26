@@ -62,8 +62,8 @@ configurations.all {
 }
 
 dependencies {
-	compile('com.github.symbiote-h2020:SymbIoTeLibraries:L2_rework-SNAPSHOT'){ changing = true }
-    //compile('com.github.symbiote-h2020:SymbIoTeLibraries:5.+') { changing = true }
+	//compile('com.github.symbiote-h2020:SymbIoTeLibraries:L2_rework-SNAPSHOT'){ changing = true }
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:5.17.+') { changing = true }
 	compile('com.github.symbiote-h2020:SymbIoTeSecurity:25.7.+'){ changing = true }
 
     // Spring
