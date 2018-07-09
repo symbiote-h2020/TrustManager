@@ -56,6 +56,8 @@ public class TrustStatsLoader {
 			if (resp != null && resp.getStatusCode().equals(HttpStatus.OK) && resp.getBody() != null && !resp.getBody().isEmpty()) {
 				List<AggregatedMetrics> res = resp.getBody();
 				return res.get(0).getStatistics().get("avg");
+			} else {
+				logger.warn("Invalid response received: ", resp);
 			}
 		} catch (Exception e) {
 			logger.warn("Fetching stats from Monitoring failed", e);
@@ -78,6 +80,8 @@ public class TrustStatsLoader {
 
 			if (resp != null && resp.get(platformId) != null) {
 				return resp.get(platformId).getTotalMisdeeds();
+			} else {
+				logger.warn("Invalid response received: ", resp);
 			}
 		} catch (Exception e) {
 			logger.warn("Fetching stats from Core AD failed", e);

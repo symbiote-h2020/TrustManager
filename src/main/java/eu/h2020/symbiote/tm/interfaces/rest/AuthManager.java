@@ -34,6 +34,9 @@ public class AuthManager {
 			throws SecurityHandlerException {
 		this.isSecurityEnabled = isSecurityEnabled;
 
+		logger.debug("componentOwnerName={}; aamAddress={}; clientId={}; keystoreName={}; isSecurityEnabled={}", componentOwnerName, aamAddress, clientId,
+				keystoreName, isSecurityEnabled);
+
 		if (this.isSecurityEnabled) {
 			securityHandler = ComponentSecurityHandlerFactory.getComponentSecurityHandler(keystoreName, keystorePass, clientId, aamAddress, componentOwnerName,
 					componentOwnerPassword);
@@ -43,7 +46,7 @@ public class AuthManager {
 	}
 
 	/**
-	 * Generates Security headers for response.
+	 * Generates Security headers for request.
 	 * 
 	 * @return {@link HttpHeaders}
 	 */
