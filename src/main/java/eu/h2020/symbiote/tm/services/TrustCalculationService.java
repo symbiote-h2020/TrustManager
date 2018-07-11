@@ -1,6 +1,7 @@
 package eu.h2020.symbiote.tm.services;
 
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -160,9 +161,30 @@ public class TrustCalculationService {
 	}
 
 	private Double getBarteringScore(String platformId) {
-		Double bScore = trustStatsLoader.getBarteringStats(platformId);
-		// TODO: Add logic
-		return bScore;
+		Calendar sincePeriod = Calendar.getInstance();
+		sincePeriod.add(Calendar.HOUR, -12);
+
+		Integer btVal = trustStatsLoader.getBarteringStats(platformId, sincePeriod.getTime());
+		return btVal != null ? calcBTMetric(btVal) : null;
+	}
+
+	private Double calcBTMetric(Integer bValue) {
+		if (bValue.compareTo(100) > 0)
+			return 100.0;
+
+		if (bValue.compareTo(50) > 0)
+			return 95.0;
+
+		if (bValue.compareTo(25) > 0)
+			return 80.0;
+
+		if (bValue.compareTo(12) > 0)
+			return 60.0;
+
+		if (bValue.compareTo(6) > 0)
+			return 30.0;
+
+		return 10.0;
 	}
 
 	private Double getFederationHistoryScore(String platformId) {

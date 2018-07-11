@@ -3,6 +3,7 @@ package eu.h2020.symbiote.tm.interfaces.rest;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import eu.h2020.symbiote.barteringAndTrading.FilterResponse;
 import eu.h2020.symbiote.cloud.monitoring.model.AggregatedMetrics;
 
 @RunWith(SpringRunner.class)
@@ -61,10 +63,32 @@ public class TrustStatsLoaderTest {
 	public void testFetchBarteringStats() throws Exception {
 		String platformId = "p134";
 
-		Mockito.when(restTemplate.getForObject("https://coreBarteringUrl?platformId=p134", Map.class)).thenReturn(new HashMap<>());
+		List<FilterResponse> resp = new ArrayList<>();
+		resp.add(new FilterResponse());
+		resp.add(new FilterResponse());
+		resp.add(new FilterResponse());
 
-		Double val = service.getBarteringStats(platformId);
+		Mockito.when(authManager.verifyResponseHeaders(Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(true);
+		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<List>(resp, HttpStatus.OK));
 
+		Integer val = service.getBarteringStats(platformId, new Date());
+
+		assertEquals(Integer.valueOf(3), val);
+	}
+
+	@Test
+	public void testFetchBarteringStatsEmpty() throws Exception {
+		String platformId = "p134";
+		Mockito.when(authManager.verifyResponseHeaders(Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(true);
+		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<List>(new ArrayList<>(), HttpStatus.OK))
+				.thenReturn(new ResponseEntity<List>(new ArrayList<>(), HttpStatus.BAD_GATEWAY));
+
+		Integer val = service.getBarteringStats(platformId, new Date());
+		assertEquals(Integer.valueOf(0), val);
+
+		val = service.getBarteringStats(platformId, new Date());
 		assertEquals(null, val);
 	}
 }

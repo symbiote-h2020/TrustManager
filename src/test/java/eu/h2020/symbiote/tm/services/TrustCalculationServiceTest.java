@@ -37,7 +37,7 @@ public class TrustCalculationServiceTest {
 	public void testGetPlatformReputationNull() {
 		String pId = "p-123";
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null).thenReturn(new ArrayList<>());
-		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString(), Mockito.any())).thenReturn(null);
 		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(null);
 
 		Double val = service.calcPlatformReputation(pId);
@@ -55,7 +55,7 @@ public class TrustCalculationServiceTest {
 
 		List<FederationHistory> fhList = generateHistory();
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(fhList);
-		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString(), Mockito.any())).thenReturn(null);
 		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(null);
 
 		Double val = service.calcPlatformReputation(pId);
@@ -67,19 +67,24 @@ public class TrustCalculationServiceTest {
 	public void testGetPlatformReputationBt() {
 		String pId = "p-123";
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null);
-		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(55.0);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString(), Mockito.any())).thenReturn(101).thenReturn(51).thenReturn(26).thenReturn(13)
+				.thenReturn(7).thenReturn(6).thenReturn(null);
 		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(null);
 
-		Double val = service.calcPlatformReputation(pId);
-		Mockito.verify(amqpService, Mockito.times(1)).fetchFederationHistory(pId);
-		assertEquals(Double.valueOf(55), val);
+		assertEquals(Double.valueOf(100), service.calcPlatformReputation(pId));
+		assertEquals(Double.valueOf(95), service.calcPlatformReputation(pId));
+		assertEquals(Double.valueOf(80), service.calcPlatformReputation(pId));
+		assertEquals(Double.valueOf(60), service.calcPlatformReputation(pId));
+		assertEquals(Double.valueOf(30), service.calcPlatformReputation(pId));
+		assertEquals(Double.valueOf(10), service.calcPlatformReputation(pId));
+		assertEquals(null, service.calcPlatformReputation(pId));
 	}
 
 	@Test
 	public void testGetPlatformReputationAd() {
 		String pId = "p-123";
 		Mockito.when(amqpService.fetchFederationHistory(Mockito.anyString())).thenReturn(null);
-		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString())).thenReturn(null);
+		Mockito.when(trustStatsLoader.getBarteringStats(Mockito.anyString(), Mockito.any())).thenReturn(null);
 		Mockito.when(trustStatsLoader.getPlatformADStats(Mockito.anyString())).thenReturn(9).thenReturn(99).thenReturn(999).thenReturn(9999).thenReturn(99999)
 				.thenReturn(100000);
 

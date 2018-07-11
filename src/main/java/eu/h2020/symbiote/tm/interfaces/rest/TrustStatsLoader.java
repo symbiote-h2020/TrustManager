@@ -1,5 +1,6 @@
 package eu.h2020.symbiote.tm.interfaces.rest;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import eu.h2020.symbiote.barteringAndTrading.FilterRequest;
+import eu.h2020.symbiote.barteringAndTrading.FilterResponse;
 import eu.h2020.symbiote.cloud.monitoring.model.AggregatedMetrics;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.communication.payloads.OriginPlatformGroupedPlatformMisdeedsReport;
@@ -53,7 +56,7 @@ public class TrustStatsLoader {
 		try {
 			String url = monitoringUrl + "?metric=availability&operation=avg&device=" + resId;
 			ResponseEntity<List> resp = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(authManager.generateRequestHeaders()), List.class);
-			if (resp != null && resp.getStatusCode().equals(HttpStatus.OK) && resp.getBody() != null && !resp.getBody().isEmpty()) {
+			if (resp.getStatusCode().equals(HttpStatus.OK) && resp.getBody() != null && !resp.getBody().isEmpty()) {
 				List<AggregatedMetrics> res = resp.getBody();
 				return res.get(0).getStatistics().get("avg");
 			} else {
@@ -95,16 +98,28 @@ public class TrustStatsLoader {
 	 * 
 	 * @param platformId
 	 *            platform ID
-	 * @return returns the avg stats
+	 * @param since
+	 *            since Date
+	 * @return returns total number of coupons used.
 	 */
 	@SuppressWarnings({ "rawtypes" })
-	public Double getBarteringStats(String platformId) {
+	public Integer getBarteringStats(String platformId, Date since) {
 		try {
-			String url = coreBarteringUrl + "?platformId=" + platformId;
-			ResponseEntity<Map> resp = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(authManager.generateRequestHeaders()), Map.class);
+			FilterRequest req = new FilterRequest();
+			req.setPlatform(platformId);
+			req.setBeginTimestamp(since.getTime());
+			req.setEndTimestamp(new Date().getTime());
 
-			if (authManager.verifyResponseHeaders("ad", SecurityConstants.CORE_AAM_INSTANCE_ID, resp.getHeaders())) {
-				// TODO: Add logic
+			ResponseEntity<List> resp = restTemplate.exchange(coreBarteringUrl, HttpMethod.POST, new HttpEntity<>(req, authManager.generateRequestHeaders()),
+					List.class);
+
+			if (authManager.verifyResponseHeaders("btm", SecurityConstants.CORE_AAM_INSTANCE_ID, resp.getHeaders())) {
+				if (resp.getStatusCode().equals(HttpStatus.OK) && resp.getBody() != null) {
+					List<FilterResponse> res = resp.getBody();
+					return res.size();
+				} else {
+					logger.warn("Invalid response received: ", resp);
+				}
 			} else {
 				logger.warn("Response Header verification failed.");
 			}
