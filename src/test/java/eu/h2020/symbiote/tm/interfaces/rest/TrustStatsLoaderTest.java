@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -51,8 +52,9 @@ public class TrustStatsLoaderTest {
 		statistics.put("avg", 12.0);
 		am.setStatistics(statistics);
 		resp.add(am);
-		Mockito.when(restTemplate.exchange("https://monitoringUrl?metric=availability&operation=avg&device=" + resId, HttpMethod.GET, new HttpEntity<>(null),
-				List.class)).thenReturn(new ResponseEntity<List>(resp, HttpStatus.OK));
+
+		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+				Mockito.any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<List<AggregatedMetrics>>(resp, HttpStatus.OK));
 
 		Double val = service.getResourceAvailabilityMetrics(resId);
 
@@ -69,8 +71,9 @@ public class TrustStatsLoaderTest {
 		resp.add(new FilterResponse());
 
 		Mockito.when(authManager.verifyResponseHeaders(Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(true);
-		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
-				.thenReturn(new ResponseEntity<List>(resp, HttpStatus.OK));
+
+		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+				Mockito.any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<List<FilterResponse>>(resp, HttpStatus.OK));
 
 		Integer val = service.getBarteringStats(platformId, new Date());
 
@@ -81,9 +84,10 @@ public class TrustStatsLoaderTest {
 	public void testFetchBarteringStatsEmpty() throws Exception {
 		String platformId = "p134";
 		Mockito.when(authManager.verifyResponseHeaders(Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(true);
-		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
-				.thenReturn(new ResponseEntity<List>(new ArrayList<>(), HttpStatus.OK))
-				.thenReturn(new ResponseEntity<List>(new ArrayList<>(), HttpStatus.BAD_GATEWAY));
+
+		Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+				Mockito.any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<List<List>>(new ArrayList<>(), HttpStatus.OK))
+				.thenReturn(new ResponseEntity<List<List>>(new ArrayList<>(), HttpStatus.BAD_GATEWAY));
 
 		Integer val = service.getBarteringStats(platformId, new Date());
 		assertEquals(Integer.valueOf(0), val);

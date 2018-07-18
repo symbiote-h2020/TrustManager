@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -51,11 +52,14 @@ public class TrustStatsLoader {
 	 *            internal resource ID
 	 * @return returns the availability in range 0 - 1
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Double getResourceAvailabilityMetrics(String resId) {
 		try {
 			String url = monitoringUrl + "?metric=availability&operation=avg&device=" + resId;
-			ResponseEntity<List> resp = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(authManager.generateRequestHeaders()), List.class);
+
+			ResponseEntity<List<AggregatedMetrics>> resp = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(authManager.generateRequestHeaders()),
+					new ParameterizedTypeReference<List<AggregatedMetrics>>() {
+					});
+
 			if (resp.getStatusCode().equals(HttpStatus.OK) && resp.getBody() != null && !resp.getBody().isEmpty()) {
 				List<AggregatedMetrics> res = resp.getBody();
 				return res.get(0).getStatistics().get("avg");
@@ -102,7 +106,6 @@ public class TrustStatsLoader {
 	 *            since Date
 	 * @return returns total number of coupons used.
 	 */
-	@SuppressWarnings({ "rawtypes" })
 	public Integer getBarteringStats(String platformId, Date since) {
 		try {
 			FilterRequest req = new FilterRequest();
@@ -110,13 +113,13 @@ public class TrustStatsLoader {
 			req.setBeginTimestamp(since.getTime());
 			req.setEndTimestamp(new Date().getTime());
 
-			ResponseEntity<List> resp = restTemplate.exchange(coreBarteringUrl, HttpMethod.POST, new HttpEntity<>(req, authManager.generateRequestHeaders()),
-					List.class);
+			ResponseEntity<List<FilterResponse>> resp = restTemplate.exchange(coreBarteringUrl, HttpMethod.POST,
+					new HttpEntity<>(req, authManager.generateRequestHeaders()), new ParameterizedTypeReference<List<FilterResponse>>() {
+					});
 
 			if (authManager.verifyResponseHeaders("btm", SecurityConstants.CORE_AAM_INSTANCE_ID, resp.getHeaders())) {
 				if (resp.getStatusCode().equals(HttpStatus.OK) && resp.getBody() != null) {
-					List<FilterResponse> res = resp.getBody();
-					return res.size();
+					return resp.getBody().size();
 				} else {
 					logger.warn("Invalid response received: ", resp);
 				}
