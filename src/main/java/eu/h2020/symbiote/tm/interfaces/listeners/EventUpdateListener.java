@@ -154,6 +154,10 @@ public class EventUpdateListener {
 				TrustEntry rte = new TrustEntry(Type.RESOURCE_TRUST, null, resId);
 				trustRepository.delete(rte.getId());
 
+				// Delete ART as resource is unshared and ART no longer needed
+				TrustEntry arte = new TrustEntry(Type.ADAPTIVE_RESOURCE_TRUST, null, resId);
+				trustRepository.delete(arte.getId());
+
 				logger.debug("Removed foreign resource trust value: resource {}", rte.getResourceId());
 			});
 		}

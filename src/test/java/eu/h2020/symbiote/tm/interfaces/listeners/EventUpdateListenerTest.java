@@ -149,7 +149,7 @@ public class EventUpdateListenerTest {
 		ResourcesDeletedMessage sr = new ResourcesDeletedMessage(map);
 
 		service.receiveForeignUnsharedResources(sr);
-		Mockito.verify(trustRepository, Mockito.times(1)).delete(Mockito.anyString());
+		Mockito.verify(trustRepository, Mockito.times(2)).delete(Mockito.anyString());
 	}
 
 	@Test
