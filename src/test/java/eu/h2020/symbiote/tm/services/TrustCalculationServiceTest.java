@@ -16,7 +16,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 import eu.h2020.symbiote.tm.interfaces.rest.TrustStatsLoader;
+import eu.h2020.symbiote.tm.repositories.SLAViolationRepository;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
+import eu.h2020.symbiote.tm.repositories.Violation;
 
 @RunWith(SpringRunner.class)
 public class TrustCalculationServiceTest {
@@ -29,6 +31,9 @@ public class TrustCalculationServiceTest {
 
 	@Mock
 	private TrustRepository repository;
+
+	@Mock
+	private SLAViolationRepository violationRepository;
 
 	@InjectMocks
 	private final TrustCalculationService service = new TrustCalculationService();
@@ -104,13 +109,25 @@ public class TrustCalculationServiceTest {
 
 	@Test
 	public void testCalcResourceTrust() {
-		Mockito.when(trustStatsLoader.getResourceAvailabilityMetrics(Mockito.anyString())).thenReturn(null).thenReturn(0.8);
+		Mockito.when(trustStatsLoader.getResourceAvailabilityMetrics(Mockito.anyString())).thenReturn(null).thenReturn(0.8).thenReturn(0.8);
+
+		List<Violation> vList = new ArrayList<>();
+		vList.add(new Violation());
+		vList.add(new Violation());
+		vList.add(new Violation());
+		vList.add(new Violation());
+		vList.add(new Violation());
+		Mockito.when(violationRepository.findRecentViolationsByResourceId(Mockito.any(), Mockito.anyString())).thenReturn(null).thenReturn(vList)
+				.thenReturn(vList);
 
 		Double val = service.calcResourceTrust("r-123");
 		assertEquals(null, val);
 
 		val = service.calcResourceTrust("r-123");
 		assertEquals(Double.valueOf(80.0), val);
+
+		val = service.calcResourceTrust("r-123");
+		assertEquals(Double.valueOf(76), val);
 	}
 
 	@Test

@@ -36,13 +36,15 @@ public class TrustReputationUpdateTasksTest {
 	@Before
 	public void setup() throws Exception {
 		ReflectionTestUtils.setField(service, "interval", 30);
+		ReflectionTestUtils.setField(service, "ownPlatformId", "abc");
 	}
 
 	@Test
 	public void testScheduleResourceTrustUpdate0() throws Exception {
 		List<TrustEntry> entries = new ArrayList<>();
 		entries.add(new TrustEntry(Type.RESOURCE_TRUST, "p-1", "sr-1"));
-		Mockito.when(trustRepository.findEntriesUpdatedAfter(Mockito.any(Date.class), Mockito.any(Type.class))).thenReturn(entries);
+		Mockito.when(trustRepository.findEntriesUpdatedAfterByPlatform(Mockito.any(Date.class), Mockito.any(Type.class), Mockito.anyString()))
+				.thenReturn(entries);
 		Mockito.when(trustService.calcResourceTrust("sr-1")).thenReturn(55.2);
 
 		service.scheduleResourceTrustUpdate();
@@ -57,7 +59,8 @@ public class TrustReputationUpdateTasksTest {
 		TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, "p-1", "sr-2");
 		te.setValue(44.0);
 		entries.add(te);
-		Mockito.when(trustRepository.findEntriesUpdatedAfter(Mockito.any(Date.class), Mockito.any(Type.class))).thenReturn(entries);
+		Mockito.when(trustRepository.findEntriesUpdatedAfterByPlatform(Mockito.any(Date.class), Mockito.any(Type.class), Mockito.anyString()))
+				.thenReturn(entries);
 		Mockito.when(trustService.calcResourceTrust("sr-2")).thenReturn(44.0);
 
 		service.scheduleResourceTrustUpdate();
@@ -72,7 +75,8 @@ public class TrustReputationUpdateTasksTest {
 		TrustEntry te = new TrustEntry(Type.RESOURCE_TRUST, "p-1", "sr-3");
 		te.setValue(44.0);
 		entries.add(te);
-		Mockito.when(trustRepository.findEntriesUpdatedAfter(Mockito.any(Date.class), Mockito.any(Type.class))).thenReturn(entries);
+		Mockito.when(trustRepository.findEntriesUpdatedAfterByPlatform(Mockito.any(Date.class), Mockito.any(Type.class), Mockito.anyString()))
+				.thenReturn(entries);
 		Mockito.when(trustService.calcResourceTrust("sr-3")).thenReturn(44.01);
 
 		service.scheduleResourceTrustUpdate();

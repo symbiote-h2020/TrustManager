@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 import eu.h2020.symbiote.tm.interfaces.rest.TrustStatsLoader;
+import eu.h2020.symbiote.tm.repositories.SLAViolationRepository;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
+import eu.h2020.symbiote.tm.repositories.Violation;
 
 /**
  * @author RuggenthalerC
@@ -34,6 +36,9 @@ public class TrustCalculationService {
 	@Autowired
 	private TrustRepository trustRepository;
 
+	@Autowired
+	private SLAViolationRepository violationRepository;
+
 	/**
 	 * Calculates resource trust for given internal resource ID.
 	 * 
@@ -42,13 +47,41 @@ public class TrustCalculationService {
 	 * @return resource trust value double value between 0 - 100 or null if not specified.
 	 */
 	public Double calcResourceTrust(String resId) {
-		Double rt = getMonitoringScore(resId);
+		Double mS = getMonitoringScore(resId);
+		Double rt = mS != null ? mS * calcViolationFactor(resId) : null;
+
 		return formatValue(rt);
 	}
 
 	private Double getMonitoringScore(String resId) {
 		Double availScore = trustStatsLoader.getResourceAvailabilityMetrics(resId);
 		return availScore != null ? availScore * 100 : null;
+	}
+
+	private Double calcViolationFactor(String resId) {
+		Calendar receivedAfter = Calendar.getInstance();
+		// use 24h period
+		receivedAfter.add(Calendar.HOUR, -24);
+		List<Violation> vList = violationRepository.findRecentViolationsByResourceId(receivedAfter.getTime(), resId);
+
+		int cnt = vList != null ? vList.size() : 0;
+
+		if (cnt < 5)
+			return 1.0;
+
+		if (cnt < 10)
+			return 0.95;
+
+		if (cnt < 15)
+			return 0.8;
+
+		if (cnt < 25)
+			return 0.6;
+
+		if (cnt < 40)
+			return 0.3;
+
+		return 0.1;
 	}
 
 	/**

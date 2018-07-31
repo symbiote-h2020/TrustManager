@@ -27,6 +27,20 @@ public interface TrustRepository extends MongoRepository<TrustEntry, String> {
 	List<TrustEntry> findEntriesUpdatedAfter(Date updatedAfter, TrustEntry.Type type);
 
 	/**
+	 * Find entries for given type and updated after a specific time.
+	 * 
+	 * @param updatedAfter
+	 *            updated after
+	 * @param type
+	 *            {@link TrustEntry.Type}
+	 * @param platformId
+	 *            Platform ID
+	 * @return list of {@link TrustEntry}
+	 */
+	@Query("{'lastUpdate': {$lte: ?0}, 'type' : ?1, 'platformId' : ?2}")
+	List<TrustEntry> findEntriesUpdatedAfterByPlatform(Date updatedAfter, TrustEntry.Type type, String platformId);
+
+	/**
 	 * Get resource trust entry by given resource ID
 	 * 
 	 * @param resId

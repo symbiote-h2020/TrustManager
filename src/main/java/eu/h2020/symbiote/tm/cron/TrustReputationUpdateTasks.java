@@ -30,6 +30,9 @@ public class TrustReputationUpdateTasks {
 	@Value("${symbIoTe.trust.update.interval}")
 	private Integer interval;
 
+	@Value("${platform.id}")
+	private String ownPlatformId;
+
 	@Autowired
 	private TrustAMQPService amqpService;
 
@@ -41,7 +44,7 @@ public class TrustReputationUpdateTasks {
 
 	@Scheduled(cron = "${symbIoTe.trust.resource_trust.period}")
 	public void scheduleResourceTrustUpdate() {
-		List<TrustEntry> entries = trustRepository.findEntriesUpdatedAfter(getUpdateInterval(), Type.RESOURCE_TRUST);
+		List<TrustEntry> entries = trustRepository.findEntriesUpdatedAfterByPlatform(getUpdateInterval(), Type.RESOURCE_TRUST, ownPlatformId);
 		logger.debug("Resource Trust update triggered for {} entries", entries.size());
 
 		entries.forEach(entry -> {

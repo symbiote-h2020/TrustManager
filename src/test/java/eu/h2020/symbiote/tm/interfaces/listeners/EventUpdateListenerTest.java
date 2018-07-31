@@ -26,15 +26,19 @@ import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 import eu.h2020.symbiote.model.cim.Resource;
 import eu.h2020.symbiote.model.mim.Federation;
 import eu.h2020.symbiote.model.mim.FederationMember;
+import eu.h2020.symbiote.tm.repositories.SLAViolationRepository;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
 
 @RunWith(SpringRunner.class)
-public class ResourceUpdateListenerTest {
+public class EventUpdateListenerTest {
 	@Mock
 	private TrustRepository trustRepository;
 
+	@Mock
+	private SLAViolationRepository violationRepository;
+
 	@InjectMocks
-	private final ResourceUpdateListener service = new ResourceUpdateListener();
+	private final EventUpdateListener service = new EventUpdateListener();
 
 	@Before
 	public void setup() throws Exception {
@@ -126,7 +130,7 @@ public class ResourceUpdateListenerTest {
 		ResourcesAddedOrUpdatedMessage sr = new ResourcesAddedOrUpdatedMessage(frList);
 
 		service.receiveForeignSharedResources(sr);
-		Mockito.verify(trustRepository, Mockito.times(1)).save(Mockito.any(TrustEntry.class));
+		Mockito.verify(trustRepository, Mockito.times(2)).save(Mockito.any(TrustEntry.class));
 	}
 
 	@Test
