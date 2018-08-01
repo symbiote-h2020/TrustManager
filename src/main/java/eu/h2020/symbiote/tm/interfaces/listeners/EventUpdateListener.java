@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 import eu.h2020.symbiote.cloud.model.internal.CloudResource;
 import eu.h2020.symbiote.cloud.model.internal.ResourcesAddedOrUpdatedMessage;
 import eu.h2020.symbiote.cloud.model.internal.ResourcesDeletedMessage;
+import eu.h2020.symbiote.cloud.sla.model.ViolationNotification;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry.Type;
 import eu.h2020.symbiote.model.mim.Federation;
 import eu.h2020.symbiote.tm.repositories.SLAViolationRepository;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
-import eu.h2020.symbiote.tm.repositories.ViolationNotification;
 import eu.h2020.symbiote.util.RabbitConstants;
 
 /**
@@ -193,9 +193,7 @@ public class EventUpdateListener {
 	 * @param slaViolation
 	 *            object containing violations.
 	 */
-	// @RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.slam}", durable =
-	// "${rabbit.exchange.slam.durable}", internal = "${rabbit.exchange.slam.internal}", autoDelete = "${rabbit.exchange.slam.autodelete}", type =
-	// "${rabbit.exchange.slam.type}"), key = "${rabbit.routingKey.slam.violation}"))
+	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.sla.name}", durable = "${rabbit.exchange.sla.durable}", internal = "${rabbit.exchange.sla.internal}", autoDelete = "${rabbit.exchange.sla.autodelete}", type = "${rabbit.exchange.sla.type}"), key = "${rabbit.routingKey.sla.violation}"))
 	public void receiveSLAViolation(ViolationNotification slaNotification) {
 		if (slaNotification != null && slaNotification.getViolations() != null) {
 			slaNotification.getViolations().forEach(violation -> {

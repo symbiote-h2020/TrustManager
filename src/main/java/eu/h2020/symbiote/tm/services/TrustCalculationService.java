@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.h2020.symbiote.cloud.federation.model.FederationHistory;
+import eu.h2020.symbiote.cloud.sla.model.Violation;
 import eu.h2020.symbiote.cloud.trust.model.TrustEntry;
 import eu.h2020.symbiote.tm.interfaces.rest.TrustStatsLoader;
 import eu.h2020.symbiote.tm.repositories.SLAViolationRepository;
 import eu.h2020.symbiote.tm.repositories.TrustRepository;
-import eu.h2020.symbiote.tm.repositories.Violation;
 
 /**
  * @author RuggenthalerC
