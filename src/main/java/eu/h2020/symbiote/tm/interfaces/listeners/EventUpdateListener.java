@@ -190,7 +190,7 @@ public class EventUpdateListener {
 	/**
 	 * Receives SLA violation object from SLA Manager.
 	 * 
-	 * @param slaViolation
+	 * @param slaNotification
 	 *            object containing violations.
 	 */
 	@RabbitListener(bindings = @QueueBinding(value = @Queue, exchange = @Exchange(value = "${rabbit.exchange.sla.name}", durable = "${rabbit.exchange.sla.durable}", internal = "${rabbit.exchange.sla.internal}", autoDelete = "${rabbit.exchange.sla.autodelete}", type = "${rabbit.exchange.sla.type}"), key = "${rabbit.routingKey.sla.violation}"))
