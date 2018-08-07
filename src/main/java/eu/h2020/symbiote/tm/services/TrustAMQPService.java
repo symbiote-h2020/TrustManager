@@ -3,6 +3,7 @@ package eu.h2020.symbiote.tm.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Queue;
@@ -96,7 +97,7 @@ public class TrustAMQPService {
 
 		if (r != null) {
 			logger.debug("Received {} history entries for platform {}", r.getEvents().size(), platformId);
-
+			r.getEvents().forEach(federationHistory -> logger.debug(ReflectionToStringBuilder.toString(federationHistory)));
 			return r.getEvents();
 		} else {
 			logger.warn("No history response returned for platform {} - response: {}", platformId, r);
