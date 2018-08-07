@@ -12,6 +12,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -37,6 +38,9 @@ import eu.h2020.symbiote.util.RabbitConstants;
 @EnableScheduling
 @EnableMongoRepositories
 class AppConfig extends AbstractMongoConfiguration {
+
+	@Value("${spring.data.mongodb.host:localhost}")
+	private String mongoHost;
 
 	@Override
 	protected String getDatabaseName() {
@@ -80,7 +84,14 @@ class AppConfig extends AbstractMongoConfiguration {
 	}
 
 	@Override
-	public Mongo mongo() throws Exception {
+	public Mongo mongo() {
 		return new MongoClient();
 	}
+
+    @Bean
+    @Override
+    public MongoTemplate mongoTemplate() {
+        return new MongoTemplate(new MongoClient(mongoHost), getDatabaseName());
+    }
+
 }
