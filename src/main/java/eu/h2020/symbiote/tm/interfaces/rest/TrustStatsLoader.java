@@ -53,8 +53,9 @@ public class TrustStatsLoader {
 	 * @return returns the availability in range 0 - 1
 	 */
 	public Double getResourceAvailabilityMetrics(String resId) {
+		String url=null;
 		try {
-			String url = monitoringUrl + "?metric=availability&operation=avg&device=" + resId;
+			url = monitoringUrl + "?metric=availability&operation=avg&device=" + resId;
 
 			ResponseEntity<List<AggregatedMetrics>> resp = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(authManager.generateRequestHeaders()),
 					new ParameterizedTypeReference<List<AggregatedMetrics>>() {
@@ -67,7 +68,9 @@ public class TrustStatsLoader {
 				logger.warn("Invalid response received: ", resp);
 			}
 		} catch (Exception e) {
-			logger.warn("Fetching stats from Monitoring failed", e);
+			logger.warn("Fetching stats from Monitoring failed");
+			logger.warn("The URL used was {}", url);
+			logger.warn("The exception thrown was:", e);
 		}
 
 		return null;
@@ -91,7 +94,9 @@ public class TrustStatsLoader {
 				logger.warn("Invalid response received: ", resp);
 			}
 		} catch (Exception e) {
-			logger.warn("Fetching stats from Core AD failed", e);
+			logger.warn("Fetching stats from Core AD failed");
+			logger.warn("The platformId was {}", platformId);
+			logger.warn("The exception thrown was:", e);
 		}
 
 		return null;
@@ -127,7 +132,9 @@ public class TrustStatsLoader {
 				logger.warn("Response Header verification failed.");
 			}
 		} catch (Exception e) {
-			logger.warn("Fetching stats from Core Bartering failed", e);
+			logger.warn("Fetching stats from Core Bartering failed.");
+			logger.warn("The URL used for the request was {}, the platformId was {}, the start date used was {}", coreBarteringUrl, platformId, since);
+			logger.warn("The exception thrown was:", e);
 		}
 
 		return null;

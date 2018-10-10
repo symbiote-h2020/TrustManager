@@ -244,7 +244,13 @@ public class TrustCalculationService {
 	}
 
 	private Double formatValue(Double val) {
-		DecimalFormat rounded = new DecimalFormat("#.##");
-		return val != null ? Double.valueOf(rounded.format(val)) : null;
+		if (val==null)
+			return null;
+
+		double val1=val*100;
+		val1=Math.floor(val1+.5);
+		val1/=100;
+		
+		return val1;
 	}
 }
