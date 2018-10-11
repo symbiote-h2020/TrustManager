@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -118,8 +119,18 @@ public class TrustStatsLoader {
 			req.setBeginTimestamp(since.getTime());
 			req.setEndTimestamp(new Date().getTime());
 
+			
+			HttpHeaders header=authManager.generateRequestHeaders();
+			if (header==null) {	// This is the case during unit testing. It's unclear whether this can also happen at other conditions thus we just issue a warning here
+				logger.warn("request header from auth manager is null!!");
+				header=new HttpHeaders();
+			}
+			
+			header.add("Content-Type", "application/json");
+			
+			
 			ResponseEntity<List<FilterResponse>> resp = restTemplate.exchange(coreBarteringUrl, HttpMethod.POST,
-					new HttpEntity<>(req, authManager.generateRequestHeaders()), new ParameterizedTypeReference<List<FilterResponse>>() {
+					new HttpEntity<>(req, header), new ParameterizedTypeReference<List<FilterResponse>>() {
 					});
 
 			if (authManager.verifyResponseHeaders("btm", SecurityConstants.CORE_AAM_INSTANCE_ID, resp.getHeaders())) {
